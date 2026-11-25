@@ -1,0 +1,3369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LifeOS — Планер, Привычки и Бюджет</title>
+  <style>
+    :root {
+      --bg-outer: #cbd5e1;
+      --bg-app: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-muted: #f8fafc;
+      --text-main: #0f172a;
+      --text-sec: #475569;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+
+      /* Насыщенная палитра акцентов */
+      --indigo: #4f46e5;
+      --indigo-soft: #eef2ff;
+      --blue: #3b82f6;
+      --blue-soft: #eff6ff;
+      --emerald: #10b981;
+      --emerald-soft: #ecfdf5;
+      --emerald-text: #047857;
+      --violet: #8b5cf6;
+      --violet-soft: #f5f3ff;
+      --violet-text: #6d28d9;
+      --amber: #f59e0b;
+      --amber-soft: #fffbeb;
+      --amber-text: #b45309;
+      --rose: #ef4444;
+      --rose-soft: #fef2f2;
+      --rose-text: #b91c1c;
+      --pink: #ec4899;
+      --pink-soft: #fdf2f8;
+      --pink-text: #be185d;
+
+      --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 6px 16px rgba(15, 23, 42, 0.08);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-outer);
+      color: var(--text-main);
+      line-height: 1.4;
+      font-size: 14px;
+    }
+
+    .app-shell {
+      max-width: 480px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background-color: var(--bg-app);
+      position: relative;
+      box-shadow: 0 0 40px rgba(15, 23, 42, 0.14);
+      padding-bottom: 84px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Шапка */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4f46e5, #ec4899);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.28);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-date {
+      font-size: 11px;
+      color: var(--text-sec);
+      font-weight: 600;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-sec);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .icon-btn:active {
+      background: var(--bg-muted);
+    }
+
+    .main-view {
+      padding: 14px 14px 26px;
+      flex: 1;
+    }
+
+    /* Карточки и сетки */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 15px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 12px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--text-sec);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .clickable-card {
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .clickable-card:active {
+      transform: scale(0.985);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sec);
+      margin-bottom: 4px;
+    }
+
+    .stat-val {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 7px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--indigo);
+      transition: width 0.25s ease;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .badge-indigo { background: var(--indigo-soft); color: var(--indigo); }
+    .badge-blue { background: var(--blue-soft); color: #1d4ed8; }
+    .badge-emerald { background: var(--emerald-soft); color: var(--emerald-text); }
+    .badge-rose { background: var(--rose-soft); color: var(--rose-text); }
+    .badge-amber { background: var(--amber-soft); color: var(--amber-text); }
+    .badge-violet { background: var(--violet-soft); color: var(--violet-text); }
+    .badge-pink { background: var(--pink-soft); color: var(--pink-text); }
+    .badge-gray { background: #e2e8f0; color: var(--text-sec); }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #ec4899 100%);
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 22px -4px rgba(79, 70, 229, 0.38);
+    }
+
+    .hero-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .hero-btn-white {
+      background: #fff;
+      color: var(--indigo);
+      border: none;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .hero-btn-glass {
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* Вкладки-таблетки */
+    .pills-bar {
+      display: flex;
+      gap: 5px;
+      overflow-x: auto;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .pills-bar::-webkit-scrollbar { display: none; }
+
+    .pill-btn {
+      flex: 1;
+      min-width: fit-content;
+      padding: 7px 11px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-sec);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .pill-btn.active {
+      background: #fff;
+      color: var(--indigo);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Карточка задачи */
+    .task-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--indigo);
+      border-radius: var(--radius-md);
+      margin-bottom: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .task-row.done {
+      opacity: 0.68;
+      border-left-color: var(--emerald);
+    }
+
+    .check-box {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      margin-top: 1px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .check-box.checked {
+      background: var(--emerald);
+      border-color: var(--emerald);
+    }
+
+    .task-body {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .task-title {
+      font-size: 14px;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .task-row.done .task-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    /* Недельный планер */
+    .week-day-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .week-day-card.today {
+      border: 2px solid var(--indigo);
+      background: #fafaff;
+    }
+
+    /* Матрица Эйзенхауэра */
+    .matrix-quad {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--bg-card);
+      margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .matrix-head {
+      padding: 10px 14px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .matrix-body {
+      padding: 10px;
+    }
+
+    /* Канбан */
+    .kanban-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin: 0 -14px;
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+
+    .kanban-col {
+      width: 265px;
+      flex-shrink: 0;
+      background: #e2e8f0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .kanban-col-head {
+      padding: 10px 12px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .kanban-col-body {
+      padding: 10px;
+    }
+
+    .kanban-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kanban-arrows {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--bg-muted);
+    }
+
+    .arrow-btn {
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-app);
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    /* Диаграмма Ганта */
+    .gantt-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .gantt-row {
+      display: flex;
+      border-bottom: 1px solid #f1f5f9;
+      min-height: 46px;
+    }
+
+    .gantt-sticky {
+      width: 148px;
+      flex-shrink: 0;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background: #fff;
+      border-right: 1px solid var(--border);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .gantt-phase-row {
+      background: linear-gradient(90deg, #eef2ff, #f5f3ff);
+      min-height: 36px;
+    }
+
+    .gantt-phase-row .gantt-sticky {
+      background: #eef2ff;
+      font-weight: 800;
+      font-size: 11px;
+      color: var(--indigo);
+    }
+
+    .gantt-timeline {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .gantt-cell {
+      width: 30px;
+      height: 100%;
+      flex-shrink: 0;
+      border-right: 1px solid #f1f5f9;
+      text-align: center;
+      font-size: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .gantt-cell.today {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--rose-text);
+      font-weight: 800;
+    }
+
+    .gantt-today-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--rose);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .gantt-bar {
+      position: absolute;
+      height: 25px;
+      border-radius: 7px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 0 6px;
+      cursor: pointer;
+      z-index: 2;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .gantt-bar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+    }
+
+    .gantt-bar-label {
+      position: relative;
+      z-index: 2;
+      font-size: 10px;
+      font-weight: 800;
+      color: #0f172a;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.95);
+    }
+
+    /* Трекер привычек */
+    .habit-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .habit-row {
+      display: flex;
+      border-bottom: 1px solid #f1f5f9;
+      align-items: stretch;
+    }
+
+    .habit-sticky {
+      width: 150px;
+      flex-shrink: 0;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background: #fff;
+      border-right: 1px solid var(--border);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .habit-day-cell {
+      width: 32px;
+      flex-shrink: 0;
+      border-right: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 0;
+    }
+
+    .habit-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      border: 1px solid #cbd5e1;
+      background: var(--bg-muted);
+      color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .habit-btn.active {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: #059669;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Бюджет */
+    .budget-acc-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      gap: 8px;
+    }
+
+    .subcat-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 0;
+      border-bottom: 1px dashed var(--border);
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .subcat-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Нижняя навигация */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: 68px;
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px 8px;
+      z-index: 30;
+    }
+
+    .nav-item {
+      border: none;
+      background: transparent;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--text-sec);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      color: var(--indigo);
+      background: var(--indigo-soft);
+    }
+
+    /* Модальные окна */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.18);
+    }
+
+    .modal-head {
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-body {
+      padding: 16px 18px 24px;
+      overflow-y: auto;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sec);
+      margin-bottom: 5px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--text-main);
+      background: #fff;
+      font-family: inherit;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--indigo);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-app);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-danger-soft {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: none;
+      background: var(--rose-soft);
+      color: var(--rose-text);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .settings-section {
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 68px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: #0f172a;
+      color: #fff;
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Верхняя панель -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">LifeOS</div>
+          <div id="header-date" class="brand-date">Личный центр управления</div>
+        </div>
+      </div>
+      <button class="icon-btn" data-action="open-settings" title="Настройки и данные">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Основной экран -->
+    <main id="app-main" class="main-view"></main>
+
+    <!-- Нижнее меню -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" id="nav-dashboard" data-action="switch-tab" data-id="dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+        </svg>
+        <span style="pointer-events:none;">Дашборд</span>
+      </button>
+      <button class="nav-item" id="nav-tasks" data-action="switch-tab" data-id="tasks">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+          <polyline points="9 11 12 14 22 4"></polyline>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+        </svg>
+        <span style="pointer-events:none;">Задачи</span>
+      </button>
+      <button class="nav-item" id="nav-habits" data-action="switch-tab" data-id="habits">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+          <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+        </svg>
+        <span style="pointer-events:none;">Привычки</span>
+      </button>
+      <button class="nav-item" id="nav-budget" data-action="switch-tab" data-id="budget">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+          <rect x="2" y="5" width="20" height="14" rx="2.5"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+        </svg>
+        <span style="pointer-events:none;">Финансы</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Всплывающее уведомление -->
+  <div id="toast" class="toast">Сохранено</div>
+
+  <!-- Модальное окно (закрывается только явно по кнопкам или Android Back) -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div id="modal-sheet" class="modal-sheet"></div>
+  </div>
+
+  <script>
+    (function() {
+      // =========================================================================
+      // 1. БЕЗОПАСНОЕ ХРАНИЛИЩЕ И НАВИГАЦИЯ
+      // =========================================================================
+      const STORAGE_KEY = 'lifeos_v5_data';
+      let memoryStore = null;
+
+      function safeReadStorage() {
+        try {
+          const raw = window.localStorage.getItem(STORAGE_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return memoryStore;
+      }
+
+      function safeWriteStorage(obj) {
+        memoryStore = obj;
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        } catch (e) {}
+      }
+
+      // =========================================================================
+      // 2. КОНСТАНТЫ И РАБОТА С ДАТАМИ
+      // =========================================================================
+      const MONTHS_NOM = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+      const MONTHS_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+      const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+      const WEEKDAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+      const KANBAN_COLS = ['Бэклог', 'В работе', 'Прогресс', 'Проверка', 'Сделано'];
+      const PRIORITIES = ['Очень высокий', 'Высокий', 'Средний', 'Низкий', 'Заморожен'];
+
+      const KANBAN_STYLES = {
+        'Бэклог':   { bg: '#64748b', soft: '#f1f5f9' },
+        'В работе': { bg: '#3b82f6', soft: '#eff6ff' },
+        'Прогресс': { bg: '#8b5cf6', soft: '#f5f3ff' },
+        'Проверка': { bg: '#f59e0b', soft: '#fffbeb' },
+        'Сделано':  { bg: '#10b981', soft: '#ecfdf5' }
+      };
+
+      const PRIORITY_BADGES = {
+        'Очень высокий': 'badge-rose',
+        'Высокий':       'badge-amber',
+        'Средний':       'badge-blue',
+        'Низкий':        'badge-gray',
+        'Заморожен':     'badge-violet'
+      };
+
+      const HABIT_COLORS = [
+        { name: 'Изумруд', hex: '#10b981' },
+        { name: 'Индиго',  hex: '#4f46e5' },
+        { name: 'Розовый', hex: '#ec4899' },
+        { name: 'Янтарь',  hex: '#f59e0b' },
+        { name: 'Фиолет',  hex: '#8b5cf6' },
+        { name: 'Синий',   hex: '#3b82f6' }
+      ];
+
+      const BUDGET_GROUPS = [
+        { key: 'income',   label: 'Доходы',             short: 'Доходы',  isIncome: true,  hasDue: false, color: '#10b981', badge: 'badge-emerald' },
+        { key: 'expenses', label: 'Расходы',            short: 'Расходы', isIncome: false, hasDue: false, color: '#ef4444', badge: 'badge-rose' },
+        { key: 'bills',    label: 'Обязательные счета', short: 'Счета',   isIncome: false, hasDue: true,  color: '#3b82f6', badge: 'badge-blue' },
+        { key: 'debts',    label: 'Долги и кредиты',    short: 'Долги',   isIncome: false, hasDue: true,  color: '#f59e0b', badge: 'badge-amber' },
+        { key: 'savings',  label: 'Сбережения',         short: 'Копилка', isIncome: false, hasDue: false, color: '#8b5cf6', badge: 'badge-violet' }
+      ];
+
+      function toISO(dt) {
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth() + 1).padStart(2, '0');
+        const d = String(dt.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      function getTodayISO() {
+        return toISO(new Date());
+      }
+
+      function addDays(iso, delta) {
+        const [y, m, d] = iso.split('-').map(Number);
+        return toISO(new Date(y, m - 1, d + delta));
+      }
+
+      function addMonthsISO(iso, deltaMonths) {
+        const [y, m, d] = iso.split('-').map(Number);
+        const first = new Date(y, m - 1 + deltaMonths, 1);
+        const maxD = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+        return toISO(new Date(first.getFullYear(), first.getMonth(), Math.min(d, maxD)));
+      }
+
+      function diffDays(startISO, endISO) {
+        const [y1, m1, d1] = startISO.split('-').map(Number);
+        const [y2, m2, d2] = endISO.split('-').map(Number);
+        return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);
+      }
+
+      function formatShortDate(iso) {
+        if (!iso || !iso.includes('-')) return '';
+        const [, m, d] = iso.split('-').map(Number);
+        return `${d} ${MONTHS_GEN[(m || 1) - 1].slice(0, 3)}`;
+      }
+
+      function formatRub(val) {
+        const num = Math.round(Number(val) || 0);
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+      }
+
+      function esc(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function getYmKey(y, m) {
+        return `${y}-${String(m + 1).padStart(2, '0')}`;
+      }
+
+      function getPrevYmKey(ymKey) {
+        const [y, m] = ymKey.split('-').map(Number);
+        const prev = new Date(y, m - 2, 1);
+        return getYmKey(prev.getFullYear(), prev.getMonth());
+      }
+
+      // =========================================================================
+      // 3. НАЧАЛЬНЫЕ ДАННЫЕ И САНИТИЗАЦИЯ
+      // =========================================================================
+      function buildDefaultCategories() {
+        return {
+          income: [
+            { id: 'sc-i1', name: 'Зарплата', plan: 120000, dueDay: '' },
+            { id: 'sc-i2', name: 'Подработка / Фриланс', plan: 25000, dueDay: '' }
+          ],
+          expenses: [
+            { id: 'sc-e1', name: 'Продукты', plan: 22000, dueDay: '' },
+            { id: 'sc-e2', name: 'Кафе и доставка', plan: 9000, dueDay: '' },
+            { id: 'sc-e3', name: 'Транспорт и такси', plan: 6000, dueDay: '' },
+            { id: 'sc-e4', name: 'Здоровье и спорт', plan: 5000, dueDay: '' }
+          ],
+          bills: [
+            { id: 'sc-b1', name: 'Аренда квартиры', plan: 30000, dueDay: '05' },
+            { id: 'sc-b2', name: 'ЖКХ и интернет', plan: 5500, dueDay: '15' }
+          ],
+          debts: [
+            { id: 'sc-d1', name: 'Кредитная карта', plan: 10000, dueDay: '12' }
+          ],
+          savings: [
+            { id: 'sc-s1', name: 'Финансовая подушка', plan: 15000, dueDay: '' },
+            { id: 'sc-s2', name: 'Отпуск / Цели', plan: 10000, dueDay: '' }
+          ]
+        };
+      }
+
+      function createDemoState() {
+        const today = getTodayISO();
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = now.getMonth();
+        const curDay = now.getDate();
+        const ymKey = getYmKey(y, m);
+
+        const makeHabitLogs = (step) => {
+          const logs = {};
+          // Заполняем текущий месяц и пару прошлых месяцев для наглядности годового графика
+          for (let offset = 0; offset <= 2; offset++) {
+            let tm = m - offset;
+            let ty = y;
+            if (tm < 0) { tm += 12; ty -= 1; }
+            const k = getYmKey(ty, tm);
+            const maxD = offset === 0 ? curDay - 1 : new Date(ty, tm + 1, 0).getDate();
+            logs[k] = {};
+            for (let d = 1; d <= maxD; d++) {
+              if ((d + step + offset) % 3 !== 0) logs[k][d] = true;
+            }
+          }
+          return logs;
+        };
+
+        const h1 = makeHabitLogs(0); h1[ymKey][curDay] = true;
+        const h2 = makeHabitLogs(1);
+        const h3 = makeHabitLogs(2); h3[ymKey][curDay] = true;
+
+        return {
+          version: 6,
+          ui: {
+            tab: 'dashboard',
+            taskSub: 'list',
+            taskFilter: 'all',
+            weekOffset: 0,
+            habitView: 'month',
+            habitYear: y,
+            habitMonth: m,
+            activeMonth: ymKey,
+            budgetFilter: 'all',
+            budgetSearch: '',
+            expandedGroups: {
+              income: true,
+              expenses: true,
+              bills: false,
+              debts: false,
+              savings: false
+            }
+          },
+          tasks: [
+            {
+              id: 't1',
+              title: 'Оплатить счета и аренду за месяц',
+              desc: 'Сверить показания счетчиков и перевести оплату',
+              assignee: 'Я',
+              type: 'Разовая',
+              recurrence: 'Ежемесячно',
+              phase: 'Личные финансы',
+              priority: 'Очень высокий',
+              status: 'В работе',
+              important: true,
+              urgent: true,
+              startDate: addDays(today, -1),
+              endDate: today,
+              progress: 60,
+              completed: false
+            },
+            {
+              id: 't2',
+              title: 'Собрать презентацию по квартальному отчету',
+              desc: 'Подготовить слайды с ключевыми метриками',
+              assignee: 'Я',
+              type: 'Разовая',
+              recurrence: 'Еженедельно',
+              phase: 'Рабочий проект',
+              priority: 'Высокий',
+              status: 'Прогресс',
+              important: true,
+              urgent: true,
+              startDate: addDays(today, -2),
+              endDate: addDays(today, 2),
+              progress: 70,
+              completed: false
+            },
+            {
+              id: 't3',
+              title: 'Составить план обучения на месяц',
+              desc: 'Выбрать 2 курса и расписать занятия в календаре',
+              assignee: 'Я',
+              type: 'Разовая',
+              recurrence: 'Ежемесячно',
+              phase: 'Развитие',
+              priority: 'Средний',
+              status: 'Бэклог',
+              important: true,
+              urgent: false,
+              startDate: today,
+              endDate: addDays(today, 5),
+              progress: 0,
+              completed: false
+            },
+            {
+              id: 't4',
+              title: 'Заказать продукты на неделю',
+              desc: 'Список в заметках',
+              assignee: 'Я',
+              type: 'Повторяющаяся',
+              recurrence: 'Еженедельно',
+              phase: 'Личные финансы',
+              priority: 'Высокий',
+              status: 'Проверка',
+              important: false,
+              urgent: true,
+              startDate: today,
+              endDate: today,
+              progress: 85,
+              completed: false
+            },
+            {
+              id: 't5',
+              title: 'Утренний обзор задач и приоритетов',
+              desc: '10 минут планирования дня',
+              assignee: 'Я',
+              type: 'Повторяющаяся',
+              recurrence: 'Ежедневно',
+              phase: 'Рабочий проект',
+              priority: 'Высокий',
+              status: 'Сделано',
+              important: true,
+              urgent: true,
+              startDate: today,
+              endDate: today,
+              progress: 100,
+              completed: true
+            }
+          ],
+          habits: [
+            { id: 'h1', name: 'Утренняя зарядка 20 мин', target: 25, color: '#10b981', logs: h1 },
+            { id: 'h2', name: 'Чтение книги 20 страниц', target: 22, color: '#4f46e5', logs: h2 },
+            { id: 'h3', name: 'Выпивать 2 литра воды', target: 30, color: '#ec4899', logs: h3 }
+          ],
+          months: {
+            [ymKey]: {
+              startBalance: 15000,
+              dailyLimit: 2500,
+              categories: buildDefaultCategories(),
+              transactions: [
+                { id: 'tx1', date: addDays(today, -5), group: 'income',   sub: 'Зарплата',           amount: 120000, desc: 'Основная выплата' },
+                { id: 'tx2', date: addDays(today, -4), group: 'bills',    sub: 'Аренда квартиры',    amount: 30000,  desc: 'Оплата за месяц' },
+                { id: 'tx3', date: addDays(today, -3), group: 'savings',  sub: 'Финансовая подушка', amount: 15000,  desc: 'Перевод в копилку' },
+                { id: 'tx4', date: addDays(today, -2), group: 'expenses', sub: 'Продукты',           amount: 3800,   desc: 'Супермаркет' },
+                { id: 'tx5', date: addDays(today, -1), group: 'debts',    sub: 'Кредитная карта',    amount: 10000,  desc: 'Плановый платеж' },
+                { id: 'tx6', date: addDays(today, -1), group: 'expenses', sub: 'Кафе и доставка',    amount: 1700,   desc: 'Ужин' },
+                { id: 'tx7', date: today,              group: 'expenses', sub: 'Продукты',           amount: 1350,   desc: 'Обед и фрукты' },
+                { id: 'tx8', date: today,              group: 'expenses', sub: 'Транспорт и такси',  amount: 450,    desc: 'Поездка' }
+              ]
+            }
+          }
+        };
+      }
+
+      function sanitizeState(raw) {
+        const now = new Date();
+        const curYm = getYmKey(now.getFullYear(), now.getMonth());
+        if (!raw || typeof raw !== 'object') return createDemoState();
+
+        const safe = {
+          version: 6,
+          ui: Object.assign({
+            tab: 'dashboard',
+            taskSub: 'list',
+            taskFilter: 'all',
+            weekOffset: 0,
+            habitView: 'month',
+            habitYear: now.getFullYear(),
+            habitMonth: now.getMonth(),
+            activeMonth: curYm,
+            budgetFilter: 'all',
+            budgetSearch: '',
+            expandedGroups: { income: true, expenses: true, bills: false, debts: false, savings: false }
+          }, raw.ui || {}),
+          tasks: Array.isArray(raw.tasks) ? raw.tasks : [],
+          habits: Array.isArray(raw.habits) ? raw.habits : [],
+          months: (raw.months && typeof raw.months === 'object') ? raw.months : {}
+        };
+
+        if (!['month', 'year'].includes(safe.ui.habitView)) safe.ui.habitView = 'month';
+        if (!safe.ui.activeMonth || !/^\d{4}-\d{2}$/.test(safe.ui.activeMonth)) {
+          safe.ui.activeMonth = curYm;
+        }
+        if (!safe.ui.expandedGroups) {
+          safe.ui.expandedGroups = { income: true, expenses: true, bills: false, debts: false, savings: false };
+        }
+
+        if (!safe.months[safe.ui.activeMonth]) {
+          safe.months[safe.ui.activeMonth] = {
+            startBalance: 0,
+            dailyLimit: 2000,
+            categories: buildDefaultCategories(),
+            transactions: []
+          };
+        }
+
+        Object.keys(safe.months).forEach(k => {
+          const m = safe.months[k];
+          if (!m.categories) m.categories = buildDefaultCategories();
+          BUDGET_GROUPS.forEach(g => {
+            if (!Array.isArray(m.categories[g.key])) m.categories[g.key] = [];
+          });
+          if (!Array.isArray(m.transactions)) m.transactions = [];
+        });
+
+        safe.tasks.forEach(t => {
+          if (!KANBAN_COLS.includes(t.status)) t.status = t.completed ? 'Сделано' : 'Бэклог';
+          if (!PRIORITIES.includes(t.priority)) t.priority = 'Средний';
+          if (t.desc === undefined) t.desc = '';
+          if (t.assignee === undefined) t.assignee = 'Я';
+        });
+
+        safe.habits.forEach((h, i) => {
+          if (!h.color) h.color = HABIT_COLORS[i % HABIT_COLORS.length].hex;
+        });
+
+        return safe;
+      }
+
+      let state = sanitizeState(safeReadStorage());
+      safeWriteStorage(state);
+
+      function persist() {
+        safeWriteStorage(state);
+      }
+
+      function showToast(msg) {
+        const el = document.getElementById('toast');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(window._toastTimer);
+        window._toastTimer = setTimeout(() => el.classList.remove('show'), 2300);
+      }
+
+      // =========================================================================
+      // 4. ЛОГИКА БЮДЖЕТА И ЗАДАЧ
+      // =========================================================================
+      function ensureMonth(ymKey) {
+        if (state.months[ymKey]) return state.months[ymKey];
+
+        const keys = Object.keys(state.months).sort();
+        const prevKey = getPrevYmKey(ymKey);
+        let src = state.months[prevKey];
+        if (!src && keys.length > 0) {
+          const earlier = keys.filter(k => k < ymKey);
+          const pick = earlier.length ? earlier[earlier.length - 1] : keys[keys.length - 1];
+          src = state.months[pick];
+        }
+
+        const clonedCats = {};
+        BUDGET_GROUPS.forEach(g => {
+          const list = src?.categories?.[g.key] || [];
+          clonedCats[g.key] = list.map((item, idx) => ({
+            id: `sc-${ymKey}-${g.key}-${idx}-${Date.now()}`,
+            name: item.name,
+            plan: Number(item.plan || 0),
+            dueDay: item.dueDay || ''
+          }));
+        });
+
+        state.months[ymKey] = {
+          startBalance: 0,
+          dailyLimit: src ? Number(src.dailyLimit || 0) : 0,
+          categories: clonedCats,
+          transactions: []
+        };
+        persist();
+        return state.months[ymKey];
+      }
+
+      function getBudgetMetrics(ymKey) {
+        const mData = ensureMonth(ymKey);
+        const txs = mData.transactions || [];
+        const today = getTodayISO();
+
+        const sumFact = (g) => txs.filter(x => x.group === g).reduce((a, x) => a + Number(x.amount || 0), 0);
+        const sumPlan = (g) => (mData.categories[g] || []).reduce((a, s) => a + Number(s.plan || 0), 0);
+
+        const plans = {
+          income: sumPlan('income'),
+          expenses: sumPlan('expenses'),
+          bills: sumPlan('bills'),
+          debts: sumPlan('debts'),
+          savings: sumPlan('savings')
+        };
+
+        const facts = {
+          income: sumFact('income'),
+          expenses: sumFact('expenses'),
+          bills: sumFact('bills'),
+          debts: sumFact('debts'),
+          savings: sumFact('savings')
+        };
+
+        const totalExpensePlan = plans.expenses + plans.bills + plans.debts;
+        const totalExpenseFact = facts.expenses + facts.bills + facts.debts;
+        const endBalance = Number(mData.startBalance || 0) + facts.income - totalExpenseFact - facts.savings;
+
+        const checkDate = today.startsWith(ymKey) ? today : `${ymKey}-01`;
+        const daySpent = txs
+          .filter(x => x.date === checkDate && x.group === 'expenses')
+          .reduce((a, x) => a + Number(x.amount || 0), 0);
+
+        const dailyLimit = Number(mData.dailyLimit || 0);
+        const dailyLeft = dailyLimit - daySpent;
+
+        return {
+          ymKey,
+          mData,
+          txs,
+          plans,
+          facts,
+          totalExpensePlan,
+          totalExpenseFact,
+          endBalance,
+          checkDate,
+          daySpent,
+          dailyLimit,
+          dailyLeft
+        };
+      }
+
+      function isTaskOnDate(t, iso) {
+        if (t.type === 'Повторяющаяся') {
+          if (iso < t.startDate) return false;
+          if (t.recurrence === 'Ежедневно') return true;
+          if (t.recurrence === 'Еженедельно') return diffDays(t.startDate, iso) % 7 === 0;
+          if (t.recurrence === 'Раз в 2 недели') return diffDays(t.startDate, iso) % 14 === 0;
+          if (t.recurrence === 'Ежемесячно') return Number(t.startDate.split('-')[2]) === Number(iso.split('-')[2]);
+        }
+        return iso >= t.startDate && iso <= (t.endDate || t.startDate);
+      }
+
+      function getMatrixCategory(imp, urg) {
+        if (imp && urg) return { label: 'Делай', badge: 'badge-emerald' };
+        if (imp && !urg) return { label: 'Решай', badge: 'badge-blue' };
+        if (!imp && urg) return { label: 'Делегируй', badge: 'badge-amber' };
+        return { label: 'Удаляй', badge: 'badge-rose' };
+      }
+
+      function spawnNextRecurring(task) {
+        if (task.type !== 'Повторяющаяся' || task._spawned) return null;
+        const start = task.startDate || getTodayISO();
+        const end = task.endDate || start;
+        const span = Math.max(0, diffDays(start, end));
+
+        let nextStart = addDays(start, 1);
+        if (task.recurrence === 'Еженедельно') nextStart = addDays(start, 7);
+        else if (task.recurrence === 'Раз в 2 недели') nextStart = addDays(start, 14);
+        else if (task.recurrence === 'Ежемесячно') nextStart = addMonthsISO(start, 1);
+
+        const nextEnd = addDays(nextStart, span);
+        task._spawned = true;
+
+        state.tasks.unshift({
+          ...task,
+          id: 't-' + Date.now() + '-' + Math.floor(Math.random() * 999),
+          startDate: nextStart,
+          endDate: nextEnd,
+          status: 'Бэклог',
+          progress: 0,
+          completed: false,
+          _spawned: false
+        });
+        return nextStart;
+      }
+
+      // =========================================================================
+      // 5. МОДАЛЬНЫЕ ОКНА (ЗАЩИТА ОТ СЛУЧАЙНОГО ЗАКРЫТИЯ + ANDROID BACK)
+      // =========================================================================
+      let hasHistoryState = false;
+
+      try {
+        window.addEventListener('popstate', function() {
+          const ov = document.getElementById('modal-overlay');
+          if (ov && ov.classList.contains('open')) {
+            ov.classList.remove('open');
+            hasHistoryState = false;
+          }
+        });
+      } catch (e) {}
+
+      function openModal(html) {
+        const ov = document.getElementById('modal-overlay');
+        const sh = document.getElementById('modal-sheet');
+        if (!ov || !sh) return;
+        const wasOpen = ov.classList.contains('open');
+        sh.innerHTML = html;
+        ov.classList.add('open');
+
+        if (!wasOpen && !hasHistoryState) {
+          try {
+            window.history.pushState({ lifeosModal: 1 }, '');
+            hasHistoryState = true;
+          } catch (e) {}
+        }
+      }
+
+      function closeModal() {
+        const ov = document.getElementById('modal-overlay');
+        if (ov && ov.classList.contains('open')) {
+          ov.classList.remove('open');
+          if (hasHistoryState) {
+            hasHistoryState = false;
+            try {
+              window.history.back();
+            } catch (e) {}
+          }
+        }
+      }
+
+      // =========================================================================
+      // 6. SVG-ГРАФИКИ И ДИАГРАММЫ
+      // =========================================================================
+      function buildDonutRingSvg(pct, color, trackColor, labelText) {
+        const safePct = Math.max(0, Math.min(100, Number(pct) || 0));
+        const r = 34;
+        const circ = 2 * Math.PI * r;
+        const offset = circ - (safePct / 100) * circ;
+        return `
+          <svg width="86" height="86" viewBox="0 0 86 86" style="display:block; margin:0 auto;">
+            <circle cx="43" cy="43" r="${r}" fill="none" stroke="${trackColor}" stroke-width="9" />
+            <circle cx="43" cy="43" r="${r}" fill="none" stroke="${color}" stroke-width="9"
+                    stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
+                    stroke-linecap="round" transform="rotate(-90 43 43)" />
+            <text x="43" y="42" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">${safePct}%</text>
+            <text x="43" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#64748b">${labelText}</text>
+          </svg>
+        `;
+      }
+
+      function build7DayChartSvg(ymKey, dailyLimit) {
+        const mData = ensureMonth(ymKey);
+        const today = getTodayISO();
+        const days = [];
+        let maxVal = Math.max(dailyLimit, 500);
+
+        for (let i = 6; i >= 0; i--) {
+          const iso = addDays(today, -i);
+          const isoYm = iso.slice(0, 7);
+          const sourceTxs = state.months[isoYm]?.transactions || mData.transactions || [];
+          const spent = sourceTxs
+            .filter(t => t.date === iso && t.group === 'expenses')
+            .reduce((a, t) => a + Number(t.amount || 0), 0);
+          if (spent > maxVal) maxVal = spent;
+          days.push({
+            label: i === 0 ? 'Сег.' : formatShortDate(iso).split(' ')[0],
+            spent,
+            isToday: i === 0
+          });
+        }
+
+        const w = 380, h = 140, padTop = 20, padBot = 22;
+        const chartH = h - padTop - padBot;
+        const colW = w / 7;
+        const limitY = padTop + chartH - (dailyLimit / maxVal) * chartH;
+
+        const bars = days.map((d, idx) => {
+          const barH = Math.max(5, (d.spent / maxVal) * chartH);
+          const x = idx * colW + (colW - 28) / 2;
+          const y = padTop + chartH - barH;
+          const over = dailyLimit > 0 && d.spent > dailyLimit;
+          const fill = over ? '#ef4444' : (d.isToday ? '#4f46e5' : '#10b981');
+          const txt = d.spent >= 1000 ? (d.spent / 1000).toFixed(1) + 'к' : d.spent;
+          return `
+            <rect x="${x}" y="${y}" width="28" height="${barH}" rx="7" fill="${fill}" />
+            <text x="${idx * colW + colW / 2}" y="${y - 4}" text-anchor="middle" font-size="9" font-weight="800" fill="${over ? '#b91c1c' : '#334155'}">${txt}</text>
+            <text x="${idx * colW + colW / 2}" y="${h - 5}" text-anchor="middle" font-size="10" font-weight="${d.isToday ? '800' : '600'}" fill="${d.isToday ? '#4f46e5' : '#64748b'}">${d.label}</text>
+          `;
+        }).join('');
+
+        const line = dailyLimit > 0
+          ? `<line x1="6" y1="${limitY}" x2="${w - 6}" y2="${limitY}" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 3" />`
+          : '';
+
+        return `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; display:block;">${line}${bars}</svg>`;
+      }
+
+      function buildHabitChartSvg(year, month, daysInMonth) {
+        const ymKey = getYmKey(year, month);
+        const total = state.habits.length;
+        if (!total) return '';
+
+        const w = 380, h = 112, padTop = 14, padBot = 18;
+        const chartH = h - padTop - padBot;
+        const stepX = (w - 16) / daysInMonth;
+
+        let bars = '';
+        for (let d = 1; d <= daysInMonth; d++) {
+          let done = 0;
+          state.habits.forEach(hab => { if (hab.logs?.[ymKey]?.[d]) done++; });
+          const barH = Math.max(4, (done / total) * chartH);
+          const x = 8 + (d - 1) * stepX + 1;
+          const y = padTop + chartH - barH;
+          const bw = Math.max(4, stepX - 2);
+          const fill = done === total ? '#10b981' : (done > 0 ? '#ec4899' : '#cbd5e1');
+          bars += `<rect x="${x}" y="${y}" width="${bw}" height="${barH}" rx="2.5" fill="${fill}" opacity="${done === 0 ? '0.35' : '0.95'}" />`;
+          if (d === 1 || d % 5 === 0 || d === daysInMonth) {
+            bars += `<text x="${x + bw / 2}" y="${h - 4}" text-anchor="middle" font-size="9" font-weight="700" fill="#64748b">${d}</text>`;
+          }
+        }
+        return `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; display:block;">${bars}</svg>`;
+      }
+
+      function buildAnnualHabitChartSvg(year) {
+        const w = 380, h = 145, padTop = 20, padBot = 22;
+        const chartH = h - padTop - padBot;
+        const colW = (w - 12) / 12;
+
+        const monthStats = [];
+        let maxCount = 1;
+
+        for (let m = 0; m < 12; m++) {
+          const ymKey = getYmKey(year, m);
+          const daysInM = new Date(year, m + 1, 0).getDate();
+          let done = 0;
+          let goal = 0;
+          state.habits.forEach(hab => {
+            const logs = hab.logs?.[ymKey] || {};
+            for (let d = 1; d <= daysInM; d++) { if (logs[d]) done++; }
+            goal += Math.min(daysInM, Math.max(1, Number(hab.target) || daysInM));
+          });
+          if (done > maxCount) maxCount = done;
+          const pct = goal ? Math.min(100, Math.round((done / goal) * 100)) : 0;
+          monthStats.push({ m, done, goal, pct });
+        }
+
+        const bars = monthStats.map((st, idx) => {
+          const barH = Math.max(5, (st.done / maxCount) * chartH);
+          const bw = 20;
+          const x = 6 + idx * colW + (colW - bw) / 2;
+          const y = padTop + chartH - barH;
+          const fill = st.pct >= 80 ? '#10b981' : (st.done > 0 ? '#ec4899' : '#cbd5e1');
+          return `
+            <rect x="${x}" y="${y}" width="${bw}" height="${barH}" rx="5" fill="${fill}" opacity="${st.done === 0 ? '0.4' : '1'}" />
+            ${st.done > 0 ? `<text x="${x + bw / 2}" y="${y - 4}" text-anchor="middle" font-size="8.5" font-weight="800" fill="#334155">${st.done}</text>` : ''}
+            <text x="${x + bw / 2}" y="${h - 5}" text-anchor="middle" font-size="9" font-weight="700" fill="#64748b">${MONTHS_SHORT[idx]}</text>
+          `;
+        }).join('');
+
+        return `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; display:block;">${bars}</svg>`;
+      }
+
+      function buildPlanVsFactSvg(metrics) {
+        const w = 380, h = 145, padTop = 18, padBot = 24;
+        const chartH = h - padTop - padBot;
+        let maxVal = 1000;
+        BUDGET_GROUPS.forEach(g => {
+          maxVal = Math.max(maxVal, metrics.plans[g.key] || 0, metrics.facts[g.key] || 0);
+        });
+
+        const colW = w / BUDGET_GROUPS.length;
+        const bars = BUDGET_GROUPS.map((g, idx) => {
+          const pVal = metrics.plans[g.key] || 0;
+          const fVal = metrics.facts[g.key] || 0;
+          const pH = Math.max(4, (pVal / maxVal) * chartH);
+          const fH = Math.max(4, (fVal / maxVal) * chartH);
+          const cx = idx * colW + colW / 2;
+
+          return `
+            <rect x="${cx - 19}" y="${padTop + chartH - pH}" width="17" height="${pH}" rx="4" fill="#94a3b8" opacity="0.55" />
+            <rect x="${cx + 2}" y="${padTop + chartH - fH}" width="17" height="${fH}" rx="4" fill="${g.color}" />
+            <text x="${cx}" y="${h - 6}" text-anchor="middle" font-size="10" font-weight="700" fill="#334155">${g.short}</text>
+          `;
+        }).join('');
+
+        return `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; display:block;">${bars}</svg>`;
+      }
+
+      // =========================================================================
+      // 7. РЕНДЕР ВСЕХ 4 ВКЛАДОК
+      // =========================================================================
+      function renderDashboard() {
+        const today = getTodayISO();
+        const now = new Date();
+        const curYm = getYmKey(now.getFullYear(), now.getMonth());
+        const curDay = now.getDate();
+
+        const todayTasks = state.tasks.filter(t => isTaskOnDate(t, today));
+        const doneTasks = todayTasks.filter(t => t.completed).length;
+        const taskPct = todayTasks.length ? Math.round((doneTasks / todayTasks.length) * 100) : 0;
+
+        const totalHabits = state.habits.length;
+        const doneHabits = state.habits.filter(h => h.logs?.[curYm]?.[curDay]).length;
+        const habitPct = totalHabits ? Math.round((doneHabits / totalHabits) * 100) : 0;
+
+        const b = getBudgetMetrics(curYm);
+        const overLimit = b.dailyLeft < 0;
+        const doNow = state.tasks.filter(t => t.important && t.urgent && !t.completed);
+
+        return `
+          <div class="hero-banner">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+              <div>
+                <span style="font-size:11px; background:rgba(255,255,255,0.22); padding:3px 10px; border-radius:999px; font-weight:700;">Сводка дня</span>
+                <h2 style="font-size:19px; font-weight:800; margin-top:6px;">Привет! Всё под контролем</h2>
+                <p style="font-size:12px; opacity:0.92; margin-top:2px;">Нажмите на любую карточку для быстрого перехода</p>
+              </div>
+              <div class="clickable-card" data-action="switch-tab" data-id="budget" style="text-align:right; background:rgba(0,0,0,0.18); padding:8px 11px; border-radius:12px;">
+                <div style="font-size:10px; opacity:0.85; font-weight:700; pointer-events:none;">БАЛАНС (${MONTHS_SHORT[now.getMonth()].toUpperCase()}) ›</div>
+                <div style="font-size:16px; font-weight:800; pointer-events:none;">${formatRub(b.endBalance)}</div>
+              </div>
+            </div>
+            <div class="hero-actions">
+              <button class="hero-btn-white" data-action="open-task-modal">+ Новая задача</button>
+              <button class="hero-btn-glass" data-action="open-tx-modal">+ Записать трату</button>
+            </div>
+          </div>
+
+          <!-- Кольцевые диаграммы прогресса с быстрым переходом -->
+          <div class="grid-2" style="margin-bottom:10px;">
+            <div class="stat-box clickable-card" data-action="switch-tab" data-id="tasks" style="text-align:center; border-top:4px solid var(--indigo);">
+              <div class="stat-label" style="pointer-events:none; color:var(--indigo);">ЗАДАЧИ СЕГОДНЯ ›</div>
+              <div style="pointer-events:none; margin:4px 0;">
+                ${buildDonutRingSvg(taskPct, '#4f46e5', '#e0e7ff', `${doneTasks} из ${todayTasks.length}`)}
+              </div>
+            </div>
+            <div class="stat-box clickable-card" data-action="switch-tab" data-id="habits" style="text-align:center; border-top:4px solid var(--emerald);">
+              <div class="stat-label" style="pointer-events:none; color:var(--emerald-text);">ПРИВЫЧКИ СЕГОДНЯ ›</div>
+              <div style="pointer-events:none; margin:4px 0;">
+                ${buildDonutRingSvg(habitPct, '#10b981', '#d1fae5', `${doneHabits} из ${totalHabits}`)}
+              </div>
+            </div>
+          </div>
+
+          <!-- Лимит дня (кликабельный переход в Финансы) -->
+          <div class="card clickable-card" data-action="switch-tab" data-id="budget" style="border-left:5px solid ${overLimit ? 'var(--rose)' : 'var(--emerald)'}; background:${overLimit ? '#fef2f2' : '#ecfdf5'};">
+            <div style="display:flex; justify-content:space-between; align-items:center; pointer-events:none;">
+              <div>
+                <div style="font-size:12px; font-weight:800; color:${overLimit ? 'var(--rose-text)' : 'var(--emerald-text)'};">
+                  ${overLimit ? 'ВНИМАНИЕ: ПЕРЕРАСХОД ЛИМИТА ДНЯ ›' : 'ДНЕВНОЙ ЛИМИТ В НОРМЕ ›'}
+                </div>
+                <div style="font-size:12px; color:var(--text-sec); margin-top:2px;">
+                  Потрачено сегодня: <b>${formatRub(b.daySpent)}</b> из ${formatRub(b.dailyLimit)}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:16px; font-weight:800; color:${overLimit ? 'var(--rose-text)' : 'var(--emerald-text)'};">
+                  ${overLimit ? '−' + formatRub(Math.abs(b.dailyLeft)) : formatRub(b.dailyLeft)}
+                </div>
+                <div style="font-size:10px; font-weight:700; color:var(--text-sec);">${overLimit ? 'Сверх лимита' : 'Остаток'}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Срочные задачи (Матрица: Делай) -->
+          <div class="card" style="border-top:4px solid var(--emerald);">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Матрица: ДЕЛАЙ сейчас</div>
+                <div class="card-sub">Важно и срочно — главный фокус</div>
+              </div>
+              <button data-action="switch-tab" data-id="tasks" style="border:none; background:var(--emerald-soft); color:var(--emerald-text); font-size:11px; font-weight:800; padding:4px 9px; border-radius:999px; cursor:pointer;">
+                Все задачи (${doNow.length}) ›
+              </button>
+            </div>
+
+            ${doNow.length === 0 ? `
+              <div style="text-align:center; padding:16px; color:var(--emerald-text); font-weight:700; font-size:12px; background:var(--emerald-soft); border-radius:12px;">
+                Все срочные задачи выполнены!
+              </div>
+            ` : doNow.map(t => `
+              <div class="task-row" style="border-left-color:var(--emerald); background:var(--bg-muted);">
+                <button class="check-box" data-action="toggle-task" data-id="${t.id}" title="Выполнить"></button>
+                <div class="task-body" data-action="open-task-modal" data-id="${t.id}">
+                  <div class="task-title" style="pointer-events:none;">${esc(t.title)}</div>
+                  <div class="task-meta" style="pointer-events:none;">
+                    <span class="badge ${PRIORITY_BADGES[t.priority] || 'badge-blue'}">${esc(t.priority)}</span>
+                    <span class="badge badge-gray">до ${formatShortDate(t.endDate)}</span>
+                    <span class="badge badge-violet">${esc(t.phase)}</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- График расходов за 7 дней -->
+          <div class="card" style="border-top:4px solid var(--amber);">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Расходы за 7 дней</div>
+                <div class="card-sub">Пунктир — лимит (${formatRub(b.dailyLimit)})</div>
+              </div>
+              <button data-action="switch-tab" data-id="budget" style="border:none; background:none; color:var(--indigo); font-size:12px; font-weight:800; cursor:pointer;">Финансы →</button>
+            </div>
+            ${build7DayChartSvg(curYm, b.dailyLimit)}
+          </div>
+
+          <!-- Авторство -->
+          <div style="text-align:center; padding:12px 14px; margin-top:4px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); color:var(--text-sec); font-size:12px; box-shadow:var(--shadow-sm);">
+            <span style="opacity:0.85;">Разработали:</span> <strong style="color:var(--indigo); font-weight:800;">GusiLebedi и Gemini</strong>
+          </div>
+        `;
+      }
+
+      // -------------------------------------------------------------------------
+      // ВКЛАДКА ЗАДАЧИ И ПРОЕКТЫ (5 РЕЖИМОВ)
+      // -------------------------------------------------------------------------
+      function renderTasksList() {
+        const today = getTodayISO();
+        const flt = state.ui.taskFilter || 'all';
+        const list = state.tasks.filter(t => {
+          if (flt === 'active') return !t.completed;
+          if (flt === 'done') return t.completed;
+          if (flt === 'recurring') return t.type === 'Повторяющаяся';
+          return true;
+        });
+
+        return `
+          <div class="pills-bar" style="background:#e2e8f0;">
+            <button class="pill-btn ${flt==='all'?'active':''}" data-action="set-task-filter" data-id="all">Все (${state.tasks.length})</button>
+            <button class="pill-btn ${flt==='active'?'active':''}" data-action="set-task-filter" data-id="active">Активные</button>
+            <button class="pill-btn ${flt==='recurring'?'active':''}" data-action="set-task-filter" data-id="recurring">Повтор</button>
+            <button class="pill-btn ${flt==='done'?'active':''}" data-action="set-task-filter" data-id="done">Готово</button>
+          </div>
+
+          ${list.length === 0 ? `
+            <div class="card" style="text-align:center; padding:26px;">
+              <p class="card-sub">Задач в этом фильтре пока нет</p>
+            </div>
+          ` : list.map(t => {
+            const mCat = getMatrixCategory(t.important, t.urgent);
+            const overdue = !t.completed && t.endDate < today;
+            const kStyle = KANBAN_STYLES[t.status] || KANBAN_STYLES['Бэклог'];
+            return `
+              <div class="task-row ${t.completed ? 'done' : ''}" style="border-left-color:${t.completed ? '#10b981' : (overdue ? '#ef4444' : kStyle.bg)};">
+                <button class="check-box ${t.completed ? 'checked' : ''}" data-action="toggle-task" data-id="${t.id}">${t.completed ? '✓' : ''}</button>
+                <div class="task-body" data-action="open-task-modal" data-id="${t.id}">
+                  <div class="task-title" style="pointer-events:none;">${esc(t.title)}</div>
+                  ${t.desc ? `<div style="font-size:12px; color:var(--text-sec); margin-top:2px; pointer-events:none;">${esc(t.desc)}</div>` : ''}
+                  <div class="task-meta" style="pointer-events:none;">
+                    <span class="badge ${mCat.badge}">${mCat.label}</span>
+                    <span class="badge ${PRIORITY_BADGES[t.priority] || 'badge-blue'}">${esc(t.priority)}</span>
+                    <span class="badge ${overdue ? 'badge-rose' : 'badge-gray'}">до ${formatShortDate(t.endDate)}</span>
+                    ${t.type === 'Повторяющаяся' ? `<span class="badge badge-pink">↻ ${esc(t.recurrence)}</span>` : ''}
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; margin-top:8px; pointer-events:none;">
+                    <div class="progress-track" style="margin-top:0; height:6px; flex:1;">
+                      <div class="progress-fill" style="width:${t.progress}%; background:${t.completed ? '#10b981' : kStyle.bg};"></div>
+                    </div>
+                    <span style="font-size:11px; font-weight:800; color:var(--text-sec);">${t.progress}%</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        `;
+      }
+
+      function renderTasksWeek() {
+        const today = getTodayISO();
+        const now = new Date();
+        const dow = (now.getDay() + 6) % 7;
+        const monday = addDays(today, -dow + (state.ui.weekOffset || 0) * 7);
+        const sunday = addDays(monday, 6);
+
+        let html = `
+          <div class="card" style="padding:10px 14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <button class="icon-btn" data-action="change-week" data-id="-1">‹</button>
+              <div style="text-align:center;">
+                <div style="font-size:14px; font-weight:800;">${formatShortDate(monday)} — ${formatShortDate(sunday)}</div>
+                <div style="font-size:11px; color:var(--text-sec);">Еженедельный планер</div>
+              </div>
+              <button class="icon-btn" data-action="change-week" data-id="1">›</button>
+            </div>
+          </div>
+        `;
+
+        for (let i = 0; i < 7; i++) {
+          const dayIso = addDays(monday, i);
+          const isToday = dayIso === today;
+          const dayTasks = state.tasks.filter(t => isTaskOnDate(t, dayIso));
+          const doneCnt = dayTasks.filter(t => t.completed).length;
+          const pct = dayTasks.length ? Math.round((doneCnt / dayTasks.length) * 100) : 0;
+
+          html += `
+            <div class="week-day-card ${isToday ? 'today' : ''}">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="font-weight:800; font-size:14px; color:${isToday ? 'var(--indigo)' : 'var(--text-main)'};">
+                    ${WEEKDAYS[i]}, ${formatShortDate(dayIso)}
+                  </span>
+                  ${isToday ? `<span class="badge badge-indigo">Сегодня</span>` : ''}
+                </div>
+                <button data-action="open-task-modal-date" data-id="${dayIso}" style="border:none; background:var(--indigo-soft); color:var(--indigo); font-size:11px; font-weight:800; padding:4px 9px; border-radius:8px; cursor:pointer;">
+                  + Задача
+                </button>
+              </div>
+              ${dayTasks.length > 0 ? `
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                  <div class="progress-track" style="margin-top:0; height:5px; flex:1;">
+                    <div class="progress-fill" style="width:${pct}%; background:var(--emerald);"></div>
+                  </div>
+                  <span style="font-size:10px; font-weight:800; color:var(--emerald-text);">${doneCnt}/${dayTasks.length}</span>
+                </div>
+              ` : ''}
+              ${dayTasks.length === 0 ? `
+                <div style="font-size:12px; color:var(--text-muted); padding:4px 0;">Свободный день</div>
+              ` : dayTasks.map(t => `
+                <div style="display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:10px; background:var(--bg-app); margin-bottom:5px;">
+                  <button class="check-box ${t.completed ? 'checked' : ''}" style="width:19px; height:19px;" data-action="toggle-task" data-id="${t.id}">${t.completed ? '✓' : ''}</button>
+                  <div data-action="open-task-modal" data-id="${t.id}" style="flex:1; min-width:0; cursor:pointer; font-size:13px; font-weight:600; ${t.completed ? 'text-decoration:line-through; color:var(--text-muted);' : ''}">
+                    ${esc(t.title)}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+        return html;
+      }
+
+      function renderTasksKanban() {
+        return `
+          <div class="kanban-scroll">
+            ${KANBAN_COLS.map((col, colIdx) => {
+              const items = state.tasks.filter(t => t.status === col);
+              const style = KANBAN_STYLES[col] || KANBAN_STYLES['Бэклог'];
+              return `
+                <div class="kanban-col">
+                  <div class="kanban-col-head" style="background:${style.bg};">
+                    <span>${col}</span>
+                    <span style="background:rgba(0,0,0,0.22); padding:2px 8px; border-radius:999px; font-size:11px;">${items.length}</span>
+                  </div>
+                  <div class="kanban-col-body">
+                    ${items.length === 0 ? `
+                      <div style="text-align:center; padding:20px 8px; color:var(--text-sec); font-size:12px;">Пусто</div>
+                    ` : items.map(t => `
+                      <div class="kanban-card" style="border-top:3px solid ${style.bg};">
+                        <div data-action="open-task-modal" data-id="${t.id}" style="cursor:pointer;">
+                          <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; margin-bottom:5px; pointer-events:none;">
+                            <span class="badge ${PRIORITY_BADGES[t.priority] || 'badge-blue'}">${esc(t.priority)}</span>
+                            <span style="font-size:10px; font-weight:700; color:var(--text-muted);">${t.progress}%</span>
+                          </div>
+                          <div style="font-size:13px; font-weight:700; pointer-events:none;">${esc(t.title)}</div>
+                          <div style="font-size:11px; color:var(--text-sec); margin-top:4px; pointer-events:none;">
+                            ${esc(t.assignee)} • до ${formatShortDate(t.endDate)}
+                          </div>
+                        </div>
+                        <div class="kanban-arrows">
+                          <button class="arrow-btn" data-action="kanban-left" data-id="${t.id}" ${colIdx === 0 ? 'disabled' : ''}>← Назад</button>
+                          <button class="arrow-btn" data-action="kanban-right" data-id="${t.id}" ${colIdx === KANBAN_COLS.length - 1 ? 'disabled' : ''}>Вперёд →</button>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      function renderTasksMatrix() {
+        const quads = [
+          { imp: true,  urg: true,  title: '1. ДЕЛАЙ (Важно + Срочно)',          bg: '#10b981' },
+          { imp: true,  urg: false, title: '2. РЕШАЙ (Важно + Не срочно)',       bg: '#3b82f6' },
+          { imp: false, urg: true,  title: '3. ДЕЛЕГИРУЙ (Не важно + Срочно)',   bg: '#f59e0b' },
+          { imp: false, urg: false, title: '4. УДАЛЯЙ (Не важно + Не срочно)',bg: '#ef4444' }
+        ];
+
+        return quads.map(q => {
+          const items = state.tasks.filter(t => Boolean(t.important) === q.imp && Boolean(t.urgent) === q.urg);
+          return `
+            <div class="matrix-quad">
+              <div class="matrix-head" style="background:${q.bg};">
+                <span>${q.title}</span>
+                <span style="background:rgba(0,0,0,0.22); padding:2px 8px; border-radius:999px; font-size:11px;">${items.length}</span>
+              </div>
+              <div class="matrix-body">
+                ${items.length === 0 ? `<div style="text-align:center; color:var(--text-muted); font-size:12px; padding:14px 0;">Нет задач</div>` :
+                  items.map(t => `
+                    <div style="display:flex; align-items:center; gap:8px; padding:8px 9px; border-radius:10px; background:var(--bg-app); margin-bottom:6px;">
+                      <button class="check-box ${t.completed ? 'checked' : ''}" style="width:19px; height:19px;" data-action="toggle-task" data-id="${t.id}">${t.completed ? '✓' : ''}</button>
+                      <div data-action="open-task-modal" data-id="${t.id}" style="flex:1; min-width:0; cursor:pointer;">
+                        <div style="font-size:13px; font-weight:700; pointer-events:none; ${t.completed ? 'text-decoration:line-through; color:var(--text-muted);' : ''}">${esc(t.title)}</div>
+                        <div style="font-size:11px; color:var(--text-sec); pointer-events:none;">${esc(t.priority)} • до ${formatShortDate(t.endDate)}</div>
+                      </div>
+                    </div>
+                  `).join('')
+                }
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderTasksGantt() {
+        const today = getTodayISO();
+        let minD = addDays(today, -3);
+        let maxD = addDays(today, 11);
+
+        state.tasks.forEach(t => {
+          if (t.startDate && t.startDate < minD) minD = addDays(t.startDate, -2);
+          if (t.endDate && t.endDate > maxD) maxD = addDays(t.endDate, 2);
+        });
+
+        const totalDays = Math.max(14, diffDays(minD, maxD) + 1);
+        const dayCols = [];
+        let todayIdx = -1;
+        for (let i = 0; i < totalDays; i++) {
+          const iso = addDays(minD, i);
+          if (iso === today) todayIdx = i;
+          const [, m, d] = iso.split('-').map(Number);
+          dayCols.push({
+            iso,
+            day: d,
+            mon: MONTHS_GEN[m - 1].slice(0, 3),
+            isToday: iso === today
+          });
+        }
+
+        const phases = {};
+        state.tasks.forEach(t => {
+          const p = t.phase || 'Общий проект';
+          if (!phases[p]) phases[p] = [];
+          phases[p].push(t);
+        });
+
+        const cellW = 30;
+        const todayLineLeft = todayIdx >= 0 ? (todayIdx * cellW + cellW / 2) : -1;
+
+        return `
+          <div class="card" style="padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+              <div>
+                <div style="font-size:13px; font-weight:800;">Диаграмма Ганта (по фазам)</div>
+                <div style="font-size:11px; color:var(--text-sec);">
+                  <span style="color:#10b981; font-weight:700;">■ Готово</span> •
+                  <span style="color:#8b5cf6; font-weight:700;">■ В работе</span> •
+                  <span style="color:#f59e0b; font-weight:700;">■ Ожидает</span> •
+                  <span style="color:#ef4444; font-weight:700;">■ Просрочено</span>
+                </div>
+              </div>
+              <span class="badge badge-indigo">${state.tasks.length} задач</span>
+            </div>
+          </div>
+
+          <div class="gantt-wrap">
+            <div style="min-width:${148 + totalDays * cellW}px;">
+              <div class="gantt-row" style="background:var(--bg-app); min-height:38px;">
+                <div class="gantt-sticky" style="background:var(--bg-app); font-size:11px; font-weight:800; color:var(--text-sec);">
+                  ФАЗА / ЗАДАЧА
+                </div>
+                <div class="gantt-timeline">
+                  ${dayCols.map(c => `
+                    <div class="gantt-cell ${c.isToday ? 'today' : ''}">
+                      <span style="font-size:8px; opacity:0.8;">${c.mon}</span>
+                      <span>${c.day}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              ${Object.entries(phases).map(([phaseName, pTasks]) => `
+                <div class="gantt-row gantt-phase-row">
+                  <div class="gantt-sticky">${esc(phaseName)}</div>
+                  <div class="gantt-timeline" style="width:${totalDays * cellW}px; padding-left:10px; font-size:11px; color:var(--indigo); font-weight:700;">
+                    ${todayLineLeft >= 0 ? `<div class="gantt-today-line" style="left:${todayLineLeft}px;"></div>` : ''}
+                    Задач в фазе: ${pTasks.length}
+                  </div>
+                </div>
+                ${pTasks.map(t => {
+                  const s = t.startDate || today;
+                  const e = (t.endDate && t.endDate >= s) ? t.endDate : s;
+                  const startIdx = Math.max(0, diffDays(minD, s));
+                  const spanDays = Math.max(1, diffDays(s, e) + 1);
+                  const leftPx = startIdx * cellW + 2;
+                  const widthPx = Math.max(cellW - 4, spanDays * cellW - 4);
+                  const overdue = !t.completed && e < today;
+
+                  let fillCol = '#8b5cf6', bgCol = '#ddd6fe';
+                  if (t.completed) { fillCol = '#10b981'; bgCol = '#a7f3d0'; }
+                  else if (overdue) { fillCol = '#ef4444'; bgCol = '#fecaca'; }
+                  else if (t.progress === 0 || t.priority === 'Заморожен') { fillCol = '#f59e0b'; bgCol = '#fde68a'; }
+
+                  return `
+                    <div class="gantt-row">
+                      <div class="gantt-sticky" data-action="open-task-modal" data-id="${t.id}" style="cursor:pointer;">
+                        <div style="font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none; ${t.completed ? 'text-decoration:line-through; color:var(--text-muted);' : ''}">
+                          ${esc(t.title)}
+                        </div>
+                        <div style="font-size:10px; color:var(--text-sec); pointer-events:none;">${spanDays} дн. • ${t.progress}%</div>
+                      </div>
+                      <div class="gantt-timeline" style="width:${totalDays * cellW}px;">
+                        ${dayCols.map(c => `<div class="gantt-cell ${c.isToday ? 'today' : ''}"></div>`).join('')}
+                        ${todayLineLeft >= 0 ? `<div class="gantt-today-line" style="left:${todayLineLeft}px;"></div>` : ''}
+                        <div class="gantt-bar" data-action="open-task-modal" data-id="${t.id}" style="left:${leftPx}px; width:${widthPx}px; background:${bgCol};">
+                          <div class="gantt-bar-fill" style="width:${t.progress}%; background:${fillCol}; pointer-events:none;"></div>
+                          <span class="gantt-bar-label" style="pointer-events:none;">${t.progress}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderTasks() {
+        const sub = state.ui.taskSub || 'list';
+        let bodyHtml = '';
+        if (sub === 'list') bodyHtml = renderTasksList();
+        else if (sub === 'week') bodyHtml = renderTasksWeek();
+        else if (sub === 'kanban') bodyHtml = renderTasksKanban();
+        else if (sub === 'matrix') bodyHtml = renderTasksMatrix();
+        else if (sub === 'gantt') bodyHtml = renderTasksGantt();
+
+        return `
+          <div class="card-header">
+            <div>
+              <h2 style="font-size:18px; font-weight:800;">Задачи и Проекты</h2>
+              <p class="card-sub">5 режимов планирования из ваших таблиц</p>
+            </div>
+            <button data-action="open-task-modal" style="padding:9px 14px; border-radius:12px; border:none; background:linear-gradient(135deg, #4f46e5, #6366f1); color:#fff; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(79,70,229,0.25);">
+              + Задача
+            </button>
+          </div>
+
+          <div class="pills-bar">
+            <button class="pill-btn ${sub==='list'?'active':''}" data-action="switch-task-sub" data-id="list">Список</button>
+            <button class="pill-btn ${sub==='week'?'active':''}" data-action="switch-task-sub" data-id="week">Неделя</button>
+            <button class="pill-btn ${sub==='kanban'?'active':''}" data-action="switch-task-sub" data-id="kanban">Канбан</button>
+            <button class="pill-btn ${sub==='matrix'?'active':''}" data-action="switch-task-sub" data-id="matrix">Матрица</button>
+            <button class="pill-btn ${sub==='gantt'?'active':''}" data-action="switch-task-sub" data-id="gantt">Гант</button>
+          </div>
+
+          ${bodyHtml}
+        `;
+      }
+
+      // -------------------------------------------------------------------------
+      // ВКЛАДКА ПРИВЫЧКИ (МЕСЯЦ + ГОДОВОЙ ОБЗОР 12 МЕСЯЦЕВ)
+      // -------------------------------------------------------------------------
+      function renderHabitsAnnual() {
+        const y = state.ui.habitYear;
+        let yearDone = 0;
+        let yearGoal = 0;
+
+        const habitRows = state.habits.map(h => {
+          let hDone = 0;
+          let hGoal = 0;
+          for (let m = 0; m < 12; m++) {
+            const ymKey = getYmKey(y, m);
+            const daysInM = new Date(y, m + 1, 0).getDate();
+            const logs = h.logs?.[ymKey] || {};
+            for (let d = 1; d <= daysInM; d++) { if (logs[d]) hDone++; }
+            hGoal += Math.min(daysInM, Math.max(1, Number(h.target) || daysInM));
+          }
+          yearDone += hDone;
+          yearGoal += hGoal;
+          const pct = hGoal ? Math.min(100, Math.round((hDone / hGoal) * 100)) : 0;
+          return { ...h, hDone, hGoal, pct };
+        });
+
+        const yearPct = yearGoal ? Math.min(100, Math.round((yearDone / yearGoal) * 100)) : 0;
+
+        return `
+          <div class="card" style="border-top:4px solid var(--pink);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <button class="icon-btn" data-action="change-habit-year" data-id="-1">‹</button>
+              <div style="text-align:center;">
+                <div style="font-size:16px; font-weight:800;">Годовой обзор: ${y} год</div>
+                <div style="font-size:11px; color:var(--text-sec); font-weight:600;">Выполнено ${yearDone} из ${yearGoal} целей (${yearPct}%)</div>
+              </div>
+              <button class="icon-btn" data-action="change-habit-year" data-id="1">›</button>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:${yearPct}%; background:linear-gradient(90deg, #ec4899, #10b981);"></div></div>
+          </div>
+
+          <div class="card" style="border-top:4px solid var(--indigo);">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Прогресс по месяцам (12 мес.)</div>
+                <div class="card-sub">Количество выполнений в каждом месяце ${y} года</div>
+              </div>
+              <span class="badge badge-indigo">${yearDone} отм.</span>
+            </div>
+            ${buildAnnualHabitChartSvg(y)}
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Итоги по каждой привычке за ${y} г.</div>
+            </div>
+            ${habitRows.length === 0 ? `
+              <div style="text-align:center; padding:16px; color:var(--text-muted); font-size:12px;">Привычки ещё не добавлены</div>
+            ` : habitRows.map(h => `
+              <div class="clickable-card" data-action="open-habit-modal" data-id="${h.id}" style="padding:10px; border-radius:12px; background:var(--bg-muted); border:1px solid var(--border); margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; pointer-events:none;">
+                  <span style="font-weight:700; font-size:13px;">${esc(h.name)}</span>
+                  <span style="font-weight:800; font-size:12px; color:${h.color};">${h.hDone} / ${h.hGoal} (${h.pct}%)</span>
+                </div>
+                <div class="progress-track" style="height:6px; margin-top:6px; pointer-events:none;">
+                  <div class="progress-fill" style="width:${h.pct}%; background:${h.color};"></div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      function renderHabits() {
+        const view = state.ui.habitView || 'month';
+        const y = state.ui.habitYear;
+        const m = state.ui.habitMonth;
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        const ymKey = getYmKey(y, m);
+
+        const now = new Date();
+        const todayDay = (now.getFullYear() === y && now.getMonth() === m) ? now.getDate() : -1;
+
+        let totalGoal = 0, totalDone = 0;
+
+        const rows = state.habits.map(h => {
+          const logs = h.logs?.[ymKey] || {};
+          let done = 0;
+          for (let d = 1; d <= daysInMonth; d++) { if (logs[d]) done++; }
+          const goal = Math.min(daysInMonth, Math.max(1, Number(h.target) || daysInMonth));
+          const pct = Math.min(100, Math.round((done / goal) * 100));
+          totalGoal += goal;
+          totalDone += done;
+          return { ...h, logs, done, goal, pct };
+        });
+
+        const overallPct = totalGoal ? Math.min(100, Math.round((totalDone / totalGoal) * 100)) : 0;
+
+        return `
+          <div class="card-header">
+            <div>
+              <h2 style="font-size:18px; font-weight:800;">Трекер привычек</h2>
+              <p class="card-sub">Тап по названию — настроить цель</p>
+            </div>
+            <button data-action="open-habit-modal" style="padding:9px 14px; border-radius:12px; border:none; background:linear-gradient(135deg, #ec4899, #f43f5e); color:#fff; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(236,72,153,0.28);">
+              + Привычка
+            </button>
+          </div>
+
+          <div class="pills-bar">
+            <button class="pill-btn ${view==='month'?'active':''}" data-action="switch-habit-view" data-id="month">Месяц (Сетка)</button>
+            <button class="pill-btn ${view==='year'?'active':''}" data-action="switch-habit-view" data-id="year">Год (12 месяцев)</button>
+          </div>
+
+          ${view === 'year' ? renderHabitsAnnual() : `
+            <div class="card" style="border-top:4px solid var(--pink);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <button class="icon-btn" data-action="change-habit-month" data-id="-1">‹</button>
+                <div style="text-align:center;">
+                  <div style="font-size:15px; font-weight:800;">${MONTHS_NOM[m]} ${y}</div>
+                  <div style="font-size:11px; color:var(--text-sec); font-weight:600;">Выполнено ${totalDone} из ${totalGoal} целей (${overallPct}%)</div>
+                </div>
+                <button class="icon-btn" data-action="change-habit-month" data-id="1">›</button>
+              </div>
+              <div class="progress-track"><div class="progress-fill" style="width:${overallPct}%; background:linear-gradient(90deg, #ec4899, #10b981);"></div></div>
+            </div>
+
+            ${rows.length === 0 ? `
+              <div class="card" style="text-align:center; padding:24px;">
+                <p class="card-sub">Добавьте первую привычку, чтобы начать трекинг</p>
+              </div>
+            ` : `
+              <div class="habit-scroll" style="margin-bottom:12px;">
+                <div style="min-width:${150 + daysInMonth * 32}px;">
+                  <div class="habit-row" style="background:var(--bg-app);">
+                    <div class="habit-sticky" style="background:var(--bg-app); font-size:11px; font-weight:800; color:var(--text-sec);">
+                      ПРИВЫЧКА / ЦЕЛЬ
+                    </div>
+                    <div style="display:flex;">
+                      ${Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => `
+                        <div class="habit-day-cell" style="font-size:11px; font-weight:800; ${d === todayDay ? 'background:var(--pink); color:#fff;' : 'color:var(--text-sec);'}">
+                          ${d}
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+
+                  ${rows.map(h => `
+                    <div class="habit-row">
+                      <div class="habit-sticky" data-action="open-habit-modal" data-id="${h.id}" style="cursor:pointer;">
+                        <div style="min-width:0; flex:1; pointer-events:none;">
+                          <div style="font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(h.name)}</div>
+                          <div style="font-size:10px; font-weight:800; color:${h.color};">${h.done}/${h.goal} дн. (${h.pct}%)</div>
+                          <div class="progress-track" style="height:4px; margin-top:4px;"><div class="progress-fill" style="width:${h.pct}%; background:${h.color};"></div></div>
+                        </div>
+                      </div>
+                      <div style="display:flex;">
+                        ${Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => {
+                          const active = Boolean(h.logs[d]);
+                          return `
+                            <div class="habit-day-cell" style="${d === todayDay ? 'background:var(--pink-soft);' : ''}">
+                              <button class="habit-btn ${active ? 'active' : ''}" style="${active ? `background:${h.color}; border-color:${h.color};` : ''}" data-action="toggle-habit-day" data-habit="${h.id}" data-day="${d}">✓</button>
+                            </div>
+                          `;
+                        }).join('')}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="card" style="border-top:4px solid var(--emerald);">
+                <div class="card-header">
+                  <div class="card-title">Активность по дням месяца</div>
+                  <span class="badge badge-pink">${overallPct}%</span>
+                </div>
+                ${buildHabitChartSvg(y, m, daysInMonth)}
+              </div>
+            `}
+          `}
+        `;
+      }
+
+      // -------------------------------------------------------------------------
+      // ВКЛАДКА ФИНАНСЫ И БЮДЖЕТ
+      // -------------------------------------------------------------------------
+      function renderBudget() {
+        const ymKey = state.ui.activeMonth;
+        const [y, mNum] = ymKey.split('-').map(Number);
+        const mIdx = mNum - 1;
+        const metrics = getBudgetMetrics(ymKey);
+        const overLimit = metrics.dailyLeft < 0;
+
+        const filter = state.ui.budgetFilter || 'all';
+        const search = (state.ui.budgetSearch || '').trim().toLowerCase();
+
+        const filteredTxs = [...metrics.txs]
+          .filter(t => filter === 'all' || t.group === filter)
+          .filter(t => !search || (t.sub || '').toLowerCase().includes(search) || (t.desc || '').toLowerCase().includes(search))
+          .sort((a, b) => b.date.localeCompare(a.date));
+
+        const groupMap = {};
+        BUDGET_GROUPS.forEach(g => { groupMap[g.key] = g; });
+
+        const debtFact = metrics.facts.debts || 0;
+        const savFact = metrics.facts.savings || 0;
+        const dsTotal = Math.max(1, debtFact + savFact);
+        const savShare = Math.round((savFact / dsTotal) * 100);
+
+        return `
+          <!-- Переключатель месяцев -->
+          <div class="card" style="padding:10px 14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <button class="icon-btn" data-action="change-budget-month" data-id="-1">‹</button>
+              <div style="text-align:center;">
+                <div style="font-size:16px; font-weight:800;">${MONTHS_NOM[mIdx]} ${y}</div>
+                <div style="font-size:11px; color:var(--text-sec);">Планы и категории наследуются</div>
+              </div>
+              <button class="icon-btn" data-action="change-budget-month" data-id="1">›</button>
+            </div>
+          </div>
+
+          <!-- 4 карточки баланса -->
+          <div class="grid-2" style="margin-bottom:10px;">
+            <div class="stat-box" style="border-top:3px solid #64748b;">
+              <div class="stat-label">Начальный баланс</div>
+              <input type="number" value="${metrics.mData.startBalance}" data-field="startBalance" class="budget-meta-input"
+                     style="width:100%; border:none; font-size:17px; font-weight:800; color:var(--text-main); background:transparent;" />
+              <div class="stat-sub">Нажмите для правки</div>
+            </div>
+            <div class="stat-box" style="background:var(--indigo-soft); border-color:#c7d2fe; border-top:3px solid var(--indigo);">
+              <div class="stat-label" style="color:var(--indigo);">Конечный баланс</div>
+              <div class="stat-val" style="color:var(--indigo);">${formatRub(metrics.endBalance)}</div>
+              <div class="stat-sub">Копилка: ${formatRub(savFact)}</div>
+            </div>
+            <div class="stat-box" style="border-top:3px solid var(--emerald);">
+              <div class="stat-label">Доходы (Факт / План)</div>
+              <div class="stat-val" style="color:var(--emerald-text); font-size:15px;">${formatRub(metrics.facts.income)}</div>
+              <div class="stat-sub">План: ${formatRub(metrics.plans.income)}</div>
+            </div>
+            <div class="stat-box" style="border-top:3px solid var(--rose);">
+              <div class="stat-label">Расходы (Факт / План)</div>
+              <div class="stat-val" style="color:var(--rose-text); font-size:15px;">${formatRub(metrics.totalExpenseFact)}</div>
+              <div class="stat-sub">План: ${formatRub(metrics.totalExpensePlan)}</div>
+            </div>
+          </div>
+
+          <!-- Дневной лимит -->
+          <div class="card" style="border-left:5px solid ${overLimit ? 'var(--rose)' : 'var(--emerald)'}; background:${overLimit ? '#fef2f2' : '#ecfdf5'};">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div>
+                <div style="font-size:13px; font-weight:800;">Дневной лимит трат</div>
+                <div style="font-size:12px; color:var(--text-sec); margin-top:2px;">
+                  За ${formatShortDate(metrics.checkDate)}: <b>${formatRub(metrics.daySpent)}</b> •
+                  <b style="color:${overLimit ? 'var(--rose-text)' : 'var(--emerald-text)'};">
+                    ${overLimit ? 'Превышение ' + formatRub(Math.abs(metrics.dailyLeft)) : 'Осталось ' + formatRub(metrics.dailyLeft)}
+                  </b>
+                </div>
+              </div>
+              <div style="background:#fff; padding:6px 10px; border-radius:10px; border:1px solid var(--border); display:flex; align-items:center; gap:4px;">
+                <input type="number" value="${metrics.dailyLimit}" data-field="dailyLimit" class="budget-meta-input"
+                       style="width:66px; border:none; text-align:right; font-weight:800; font-size:13px;" />
+                <span style="font-size:12px; font-weight:700;">₽</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Визуальная аналитика: План vs Факт и Долги vs Сбережения -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">План vs Факт по категориям</div>
+                <div class="card-sub">Серый — План • Цветной — Факт</div>
+              </div>
+            </div>
+            ${buildPlanVsFactSvg(metrics)}
+            <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--bg-muted);">
+              <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800; margin-bottom:4px;">
+                <span style="color:var(--violet-text);">Сбережения: ${formatRub(savFact)}</span>
+                <span style="color:var(--amber-text);">Долги: ${formatRub(debtFact)}</span>
+              </div>
+              <div style="height:9px; background:var(--amber); border-radius:999px; overflow:hidden; display:flex;">
+                <div style="width:${(debtFact + savFact) === 0 ? 50 : savShare}%; background:var(--violet); height:100%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5 цветных блоков категорий -->
+          ${BUDGET_GROUPS.map(g => {
+            const isOpen = Boolean(state.ui.expandedGroups[g.key]);
+            const subList = metrics.mData.categories[g.key] || [];
+            const gPlan = metrics.plans[g.key] || 0;
+            const gFact = metrics.facts[g.key] || 0;
+            const rem = g.isIncome ? (gFact - gPlan) : (gPlan - gFact);
+
+            return `
+              <div class="card" style="padding:13px 15px; border-left:5px solid ${g.color};">
+                <div class="budget-acc-head" data-action="toggle-budget-group" data-id="${g.key}">
+                  <div style="pointer-events:none;">
+                    <div class="card-title">${g.label} <span style="font-size:11px; color:var(--text-muted);">(${subList.length})</span></div>
+                    <div class="card-sub">
+                      План: <b>${formatRub(gPlan)}</b> • Факт: <b>${formatRub(gFact)}</b> •
+                      <span style="font-weight:800; color:${rem < 0 ? 'var(--rose-text)' : 'var(--emerald-text)'};">
+                        ${rem > 0 ? '+' : ''}${formatRub(rem)}
+                      </span>
+                    </div>
+                  </div>
+                  <span style="font-size:13px; font-weight:800; color:${g.color}; pointer-events:none;">${isOpen ? '▲' : '▼'}</span>
+                </div>
+
+                ${isOpen ? `
+                  <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--bg-muted);">
+                    ${subList.map(sc => {
+                      const scFact = metrics.txs
+                        .filter(tx => tx.group === g.key && tx.sub === sc.name)
+                        .reduce((a, tx) => a + Number(tx.amount || 0), 0);
+                      return `
+                        <div class="subcat-item">
+                          <div style="flex:1; min-width:0;">
+                            <div style="font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(sc.name)}</div>
+                            <div style="font-size:11px; color:var(--text-sec);">
+                              Факт: <b>${formatRub(scFact)}</b>
+                              ${g.hasDue && sc.dueDay ? ` • <span style="color:var(--amber-text); font-weight:700;">до ${esc(sc.dueDay)} числа</span>` : ''}
+                            </div>
+                          </div>
+                          <div style="display:flex; align-items:center; gap:6px;">
+                            <div style="text-align:right;">
+                              <div style="font-size:9px; color:var(--text-muted); font-weight:800;">ПЛАН ₽</div>
+                              <input type="number" value="${sc.plan}" data-group="${g.key}" data-subid="${sc.id}" class="subcat-plan-input"
+                                     style="width:74px; text-align:right; border:1px solid var(--border); border-radius:8px; padding:4px 6px; font-size:12px; font-weight:700;" />
+                            </div>
+                            <button data-action="delete-subcat" data-group="${g.key}" data-subid="${sc.id}" style="border:none; background:none; color:var(--text-muted); padding:4px; cursor:pointer;" title="Удалить">✕</button>
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+
+                    <button data-action="open-subcat-modal" data-id="${g.key}" style="margin-top:8px; width:100%; padding:8px; border-radius:10px; border:1px dashed ${g.color}; background:var(--bg-muted); color:${g.color}; font-size:12px; font-weight:800; cursor:pointer;">
+                      + Подкатегория
+                    </button>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('')}
+
+          <!-- Журнал операций -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Журнал операций</div>
+                <div class="card-sub">Тап по записи для редактирования</div>
+              </div>
+              <button data-action="open-tx-modal" style="padding:8px 13px; border-radius:11px; border:none; background:linear-gradient(135deg, #4f46e5, #6366f1); color:#fff; font-size:12px; font-weight:800; cursor:pointer;">
+                + Операция
+              </button>
+            </div>
+
+            <div class="form-group" style="margin-bottom:8px;">
+              <input id="budget-search-input" class="form-control" type="search"
+                     value="${esc(state.ui.budgetSearch || '')}"
+                     placeholder="Поиск по описанию или подкатегории..."
+                     style="padding:8px 12px; font-size:13px;" />
+            </div>
+
+            <div class="pills-bar">
+              <button class="pill-btn ${filter==='all'?'active':''}" data-action="set-budget-filter" data-id="all">Все</button>
+              ${BUDGET_GROUPS.map(g => `
+                <button class="pill-btn ${filter===g.key?'active':''}" data-action="set-budget-filter" data-id="${g.key}">${g.short}</button>
+              `).join('')}
+            </div>
+
+            ${filteredTxs.length === 0 ? `
+              <div style="text-align:center; padding:18px; color:var(--text-muted); font-size:12px;">
+                Операций за этот период не найдено
+              </div>
+            ` : filteredTxs.map(tx => {
+              const info = groupMap[tx.group] || groupMap.expenses;
+              const isInc = tx.group === 'income';
+              return `
+                <div class="task-row" style="align-items:center; border-left-color:${info.color}; background:var(--bg-muted);">
+                  <div class="task-body" data-action="open-tx-modal" data-id="${tx.id}">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; pointer-events:none;">
+                      <span class="badge ${info.badge}">${info.short}</span>
+                      <span style="font-weight:700; font-size:13px;">${esc(tx.sub)}</span>
+                    </div>
+                    <div style="font-size:11px; color:var(--text-sec); margin-top:4px; pointer-events:none;">
+                      ${formatShortDate(tx.date)} ${tx.desc ? '• ' + esc(tx.desc) : ''}
+                    </div>
+                  </div>
+                  <div data-action="open-tx-modal" data-id="${tx.id}" style="font-weight:800; font-size:14px; cursor:pointer; color:${isInc ? 'var(--emerald-text)' : 'var(--text-main)'};">
+                    ${isInc ? '+' : '−'}${formatRub(tx.amount)}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 8. МОДАЛЬНЫЕ ФОРМЫ (ЗАКРЫТИЕ ТОЛЬКО ПО КНОПКАМ ИЛИ ANDROID BACK)
+      // =========================================================================
+      function showTaskModal(taskId = null, defaultDate = null) {
+        const existing = taskId ? state.tasks.find(x => x.id === taskId) : null;
+        const today = defaultDate || getTodayISO();
+        const t = existing || {
+          title: '',
+          desc: '',
+          assignee: 'Я',
+          type: 'Разовая',
+          recurrence: 'Ежедневно',
+          phase: 'Личный проект',
+          priority: 'Высокий',
+          status: 'Бэклог',
+          important: true,
+          urgent: false,
+          startDate: today,
+          endDate: today,
+          progress: 0
+        };
+
+        openModal(`
+          <div class="modal-head">
+            <span style="font-weight:800; font-size:16px;">${existing ? 'Редактировать задачу' : 'Новая задача'}</span>
+            <button class="icon-btn" data-action="close-modal">✕</button>
+          </div>
+          <div class="modal-body">
+            <form id="form-task" data-edit-id="${existing ? existing.id : ''}">
+              <div class="form-group">
+                <label class="form-label">Название задачи *</label>
+                <input id="f-task-title" class="form-control" type="text" required value="${esc(t.title)}" placeholder="Например: Подготовить отчет" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Описание</label>
+                <textarea id="f-task-desc" class="form-control" rows="2" placeholder="Детали задачи...">${esc(t.desc || '')}</textarea>
+              </div>
+
+              <div class="grid-2 form-group">
+                <div>
+                  <label class="form-label">Тип задачи</label>
+                  <select id="f-task-type" class="form-control">
+                    <option value="Разовая" ${t.type==='Разовая'?'selected':''}>Разовая</option>
+                    <option value="Повторяющаяся" ${t.type==='Повторяющаяся'?'selected':''}>Повторяющаяся</option>
+                  </select>
+                </div>
+                <div id="f-rec-wrap" style="display:${t.type==='Повторяющаяся'?'block':'none'};">
+                  <label class="form-label">Периодичность</label>
+                  <select id="f-task-rec" class="form-control">
+                    <option value="Ежедневно" ${t.recurrence==='Ежедневно'?'selected':''}>Ежедневно</option>
+                    <option value="Еженедельно" ${t.recurrence==='Еженедельно'?'selected':''}>Еженедельно</option>
+                    <option value="Раз в 2 недели" ${t.recurrence==='Раз в 2 недели'?'selected':''}>Раз в 2 недели</option>
+                    <option value="Ежемесячно" ${t.recurrence==='Ежемесячно'?'selected':''}>Ежемесячно</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group" style="background:var(--bg-app); padding:10px 12px; border-radius:12px; border:1px solid var(--border);">
+                <div style="font-size:12px; font-weight:800; margin-bottom:6px;">Матрица Эйзенхауэра:</div>
+                <div style="display:flex; gap:18px;">
+                  <label style="display:flex; align-items:center; gap:6px; font-weight:700; cursor:pointer;">
+                    <input id="f-task-imp" type="checkbox" ${t.important ? 'checked' : ''} style="width:16px; height:16px;" /> Важно
+                  </label>
+                  <label style="display:flex; align-items:center; gap:6px; font-weight:700; cursor:pointer;">
+                    <input id="f-task-urg" type="checkbox" ${t.urgent ? 'checked' : ''} style="width:16px; height:16px;" /> Срочно
+                  </label>
+                </div>
+              </div>
+
+              <div class="grid-2 form-group">
+                <div>
+                  <label class="form-label">Приоритет</label>
+                  <select id="f-task-priority" class="form-control">
+                    ${PRIORITIES.map(p => `<option value="${p}" ${t.priority===p?'selected':''}>${p}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Статус Канбана</label>
+                  <select id="f-task-status" class="form-control">
+                    ${KANBAN_COLS.map(c => `<option value="${c}" ${t.status===c?'selected':''}>${c}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid-2 form-group">
+                <div>
+                  <label class="form-label">Фаза Ганта / Проект</label>
+                  <input id="f-task-phase" class="form-control" type="text" value="${esc(t.phase)}" placeholder="Рабочий проект" />
+                </div>
+                <div>
+                  <label class="form-label">Ответственный</label>
+                  <input id="f-task-assignee" class="form-control" type="text" value="${esc(t.assignee || 'Я')}" />
+                </div>
+              </div>
+
+              <div class="grid-2 form-group">
+                <div>
+                  <label class="form-label">Дата начала</label>
+                  <input id="f-task-start" class="form-control" type="date" value="${t.startDate}" required />
+                </div>
+                <div>
+                  <label class="form-label">Дедлайн</label>
+                  <input id="f-task-end" class="form-control" type="date" value="${t.endDate}" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:800; margin-bottom:4px;">
+                  <span>Прогресс (0–100%)</span>
+                  <span id="f-prog-lbl" style="color:var(--indigo);">${t.progress}%</span>
+                </div>
+                <input id="f-task-prog" type="range" min="0" max="100" step="5" value="${t.progress}" style="width:100%;" />
+              </div>
+
+              <div style="display:flex; gap:8px; margin-top:14px;">
+                ${existing ? `<button type="button" class="btn-danger-soft" data-action="delete-task" data-id="${existing.id}">Удалить</button>` : `<button type="button" class="btn-secondary" style="width:auto;" data-action="close-modal">Отмена</button>`}
+                <button type="submit" class="btn-primary">${existing ? 'Сохранить' : 'Создать задачу'}</button>
+              </div>
+            </form>
+          </div>
+        `);
+      }
+
+      function showHabitModal(habitId = null) {
+        const existing = habitId ? state.habits.find(x => x.id === habitId) : null;
+        const maxDays = new Date(state.ui.habitYear, state.ui.habitMonth + 1, 0).getDate();
+        const nameVal = existing ? existing.name : '';
+        const targetVal = existing ? existing.target : Math.min(25, maxDays);
+        const colorVal = existing ? existing.color : HABIT_COLORS[0].hex;
+
+        openModal(`
+          <div class="modal-head">
+            <span style="font-weight:800; font-size:16px;">${existing ? 'Редактировать привычку' : 'Новая привычка'}</span>
+            <button class="icon-btn" data-action="close-modal">✕</button>
+          </div>
+          <div class="modal-body">
+            <form id="form-habit" data-edit-id="${existing ? existing.id : ''}">
+              <div class="form-group">
+                <label class="form-label">Название привычки *</label>
+                <input id="f-hab-name" class="form-control" type="text" required value="${esc(nameVal)}" placeholder="Например: Спортзал или Чтение" />
+              </div>
+              <div class="grid-2 form-group">
+                <div>
+                  <label class="form-label">Цель дней в месяц (1–31)</label>
+                  <input id="f-hab-target" class="form-control" type="number" min="1" max="31" value="${targetVal}" required />
+                </div>
+                <div>
+                  <label class="form-label">Цвет индикатора</label>
+                  <select id="f-hab-color" class="form-control">
+                    ${HABIT_COLORS.map(c => `<option value="${c.hex}" ${colorVal===c.hex?'selected':''}>${c.name}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:14px;">
+                ${existing ? `<button type="button" class="btn-danger-soft" data-action="delete-habit" data-id="${existing.id}">Удалить</button>` : `<button type="button" class="btn-secondary" style="width:auto;" data-action="close-modal">Отмена</button>`}
+                <button type="submit" class="btn-primary" style="background:linear-gradient(135deg, #ec4899, #f43f5e);">${existing ? 'Сохранить' : 'Добавить привычку'}</button>
+              </div>
+            </form>
+          </div>
+        `);
+      }
+
+      function showSubcatModal(groupKey) {
+        const grp = BUDGET_GROUPS.find(g => g.key === groupKey) || BUDGET_GROUPS[1];
+        openModal(`
+          <div class="modal-head">
+            <span style="font-weight:800; font-size:16px;">+ Подкатегория (${grp.label})</span>
+            <button class="icon-btn" data-action="close-modal">✕</button>
+          </div>
+          <div class="modal-body">
+            <form id="form-subcat" data-group="${grp.key}">
+              <div class="form-group">
+                <label class="form-label">Название подкатегории *</label>
+                <input id="f-sc-name" class="form-control" type="text" required placeholder="Например: Спорт или Кэшбэк" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Плановая сумма на месяц (₽)</label>
+                <input id="f-sc-plan" class="form-control" type="number" min="0" step="any" value="0" required />
+              </div>
+              ${grp.hasDue ? `
+                <div class="form-group">
+                  <label class="form-label">Срок оплаты (день месяца, 1–31)</label>
+                  <input id="f-sc-due" class="form-control" type="number" min="1" max="31" placeholder="Например: 15" />
+                </div>
+              ` : ''}
+              <div style="display:flex; gap:8px; margin-top:14px;">
+                <button type="button" class="btn-secondary" style="width:auto;" data-action="close-modal">Отмена</button>
+                <button type="submit" class="btn-primary">Добавить подкатегорию</button>
+              </div>
+            </form>
+          </div>
+        `);
+      }
+
+      function populateSubcatSelect(groupKey, selectedVal) {
+        const sel = document.getElementById('f-tx-sub');
+        if (!sel) return;
+        const mData = ensureMonth(state.ui.activeMonth);
+        const list = (mData.categories[groupKey] || []).map(s => s.name);
+        if (selectedVal && !list.includes(selectedVal)) list.unshift(selectedVal);
+        if (list.length === 0) list.push('Прочее');
+        sel.innerHTML = list.map(s => `<option value="${esc(s)}" ${s === selectedVal ? 'selected' : ''}>${esc(s)}</option>`).join('');
+      }
+
+      function showTxModal(txId = null) {
+        const ymKey = state.ui.activeMonth;
+        const mData = ensureMonth(ymKey);
+        const existing = txId ? mData.transactions.find(x => x.id === txId) : null;
+        const today = getTodayISO();
+        const defDate = today.startsWith(ymKey) ? today : `${ymKey}-01`;
+
+        const tx = existing || {
+          group: 'expenses',
+          sub: '',
+          amount: '',
+          date: defDate,
+          desc: ''
+        };
+
+        openModal(`
+          <div class="modal-head">
+            <span style="font-weight:800; font-size:16px;">${existing ? 'Редактировать операцию' : 'Новая операция'}</span>
+            <button class="icon-btn" data-action="close-modal">✕</button>
+          </div>
+          <div class="modal-body">
+            <form id="form-tx" data-edit-id="${existing ? existing.id : ''}">
+              <div class="grid-2 form-group">
+                <div>
+                  <label class="form-label">Категория</label>
+                  <select id="f-tx-group" class="form-control">
+                    <option value="expenses" ${tx.group==='expenses'?'selected':''}>Расходы</option>
+                    <option value="income" ${tx.group==='income'?'selected':''}>Доходы</option>
+                    <option value="bills" ${tx.group==='bills'?'selected':''}>Обязательные счета</option>
+                    <option value="debts" ${tx.group==='debts'?'selected':''}>Долги и кредиты</option>
+                    <option value="savings" ${tx.group==='savings'?'selected':''}>Сбережения</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Подкатегория</label>
+                  <select id="f-tx-sub" class="form-control"></select>
+                </div>
+              </div>
+
+              <div class="grid-2 form-group">
+                <div>
+                  <label class="form-label">Сумма (₽) *</label>
+                  <input id="f-tx-amount" class="form-control" type="number" min="0.01" step="any" required value="${tx.amount}" placeholder="1500" />
+                </div>
+                <div>
+                  <label class="form-label">Дата</label>
+                  <input id="f-tx-date" class="form-control" type="date" value="${tx.date}" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Описание</label>
+                <input id="f-tx-desc" class="form-control" type="text" value="${esc(tx.desc || '')}" placeholder="Комментарий к операции..." />
+              </div>
+
+              <div style="display:flex; gap:8px; margin-top:14px;">
+                ${existing ? `<button type="button" class="btn-danger-soft" data-action="delete-tx" data-id="${existing.id}">Удалить</button>` : `<button type="button" class="btn-secondary" style="width:auto;" data-action="close-modal">Отмена</button>`}
+                <button type="submit" class="btn-primary">${existing ? 'Сохранить' : 'Записать операцию'}</button>
+              </div>
+            </form>
+          </div>
+        `);
+        populateSubcatSelect(tx.group, tx.sub);
+      }
+
+      function getBackupJson() {
+        return JSON.stringify({ app: 'LifeOS', version: 6, exportedAt: new Date().toISOString(), data: state }, null, 2);
+      }
+
+      function showSettingsModal() {
+        const jsonPreview = getBackupJson();
+        openModal(`
+          <div class="modal-head">
+            <span style="font-weight:800; font-size:16px;">Настройки и управление данными</span>
+            <button class="icon-btn" data-action="close-modal">✕</button>
+          </div>
+          <div class="modal-body">
+            <!-- Экспорт -->
+            <div class="settings-section">
+              <div style="font-size:13px; font-weight:800; margin-bottom:4px;">1. Резервная копия (Экспорт)</div>
+              <div style="font-size:12px; color:var(--text-sec); margin-bottom:10px;">
+                Сохраните все данные в файл <b>.json</b> или скопируйте код ниже для Android WebView.
+              </div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="button" class="btn-primary" data-action="download-backup">⬇ Скачать файл (.json)</button>
+                <button type="button" class="btn-secondary" data-action="copy-backup">📋 Скопировать JSON-код</button>
+                <textarea id="backup-export-ta" class="form-control" rows="3" readonly style="font-family:monospace; font-size:11px; color:var(--text-sec);">${esc(jsonPreview)}</textarea>
+              </div>
+            </div>
+
+            <!-- Импорт -->
+            <div class="settings-section">
+              <div style="font-size:13px; font-weight:800; margin-bottom:4px;">2. Восстановление из копии (Импорт)</div>
+              <div style="font-size:12px; color:var(--text-sec); margin-bottom:10px;">
+                Выберите файл резервной копии или вставьте JSON-текст.
+              </div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <label class="btn-secondary" style="cursor:pointer;">
+                  📂 Выбрать файл .json с устройства
+                  <input type="file" id="backup-file-input" accept=".json,application/json" style="display:none;" />
+                </label>
+                <textarea id="backup-import-ta" class="form-control" rows="3" placeholder="Вставьте сюда JSON-код резервной копии..." style="font-family:monospace; font-size:11px;"></textarea>
+                <button type="button" class="btn-secondary" data-action="import-backup-text" style="border-color:#c7d2fe; color:var(--indigo); background:var(--indigo-soft);">
+                  ↻ Восстановить из текста
+                </button>
+              </div>
+            </div>
+
+            <!-- Очистка и демо -->
+            <div class="settings-section" style="margin-bottom:0;">
+              <div style="font-size:13px; font-weight:800; margin-bottom:4px;">3. Очистка и демо-примеры</div>
+              <div style="font-size:12px; color:var(--text-sec); margin-bottom:10px;">
+                Удалите тестовые записи, чтобы начать вести свой учёт с чистого листа.
+              </div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="button" class="btn-danger-soft" data-action="show-reset-confirm" style="width:100%; padding:12px;">
+                  🗑 Начать с чистого листа
+                </button>
+
+                <div id="reset-confirm-box" style="display:none; background:#fff; border:1px solid #fecaca; border-radius:12px; padding:12px;">
+                  <div style="font-size:12px; font-weight:700; color:var(--rose-text); margin-bottom:8px;">
+                    Удалить все задачи, привычки, операции и обнулить цифры? Базовые категории бюджета останутся.
+                  </div>
+                  <div class="grid-2">
+                    <button type="button" class="btn-secondary" data-action="hide-reset-confirm">Отмена</button>
+                    <button type="button" data-action="confirm-clean-slate" style="padding:10px; border-radius:12px; border:none; background:var(--rose); color:#fff; font-size:13px; font-weight:800; cursor:pointer;">
+                      Да, очистить
+                    </button>
+                  </div>
+                </div>
+
+                <button type="button" class="btn-secondary" data-action="load-demo-data">
+                  ✨ Загрузить демо-примеры
+                </button>
+              </div>
+            </div>
+          </div>
+        `);
+      }
+
+      // =========================================================================
+      // 9. ЕДИНЫЙ ОБРАБОТЧИК СОБЫТИЙ
+      // =========================================================================
+      document.addEventListener('click', function(e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+
+        const action = target.getAttribute('data-action');
+        const id = target.getAttribute('data-id');
+
+        if (action === 'switch-tab') {
+          state.ui.tab = id;
+          persist();
+          renderApp();
+          window.scrollTo(0, 0);
+        }
+        else if (action === 'switch-task-sub') {
+          state.ui.taskSub = id;
+          persist();
+          renderApp();
+        }
+        else if (action === 'set-task-filter') {
+          state.ui.taskFilter = id;
+          persist();
+          renderApp();
+        }
+        else if (action === 'toggle-task') {
+          const t = state.tasks.find(x => x.id === id);
+          if (!t) return;
+          t.completed = !t.completed;
+          if (t.completed) {
+            t.progress = 100;
+            t.status = 'Сделано';
+            const nextDate = spawnNextRecurring(t);
+            persist();
+            renderApp();
+            showToast(nextDate ? `Выполнено! Повтор на ${formatShortDate(nextDate)}` : 'Задача выполнена!');
+          } else {
+            if (t.progress === 100) t.progress = 50;
+            if (t.status === 'Сделано') t.status = 'В работе';
+            persist();
+            renderApp();
+            showToast('Возвращено в работу');
+          }
+        }
+        else if (action === 'kanban-left' || action === 'kanban-right') {
+          const t = state.tasks.find(x => x.id === id);
+          if (!t) return;
+          const delta = action === 'kanban-right' ? 1 : -1;
+          const idx = KANBAN_COLS.indexOf(t.status);
+          const nextIdx = idx + delta;
+          if (nextIdx < 0 || nextIdx >= KANBAN_COLS.length) return;
+          t.status = KANBAN_COLS[nextIdx];
+          if (t.status === 'Сделано') {
+            t.completed = true;
+            t.progress = 100;
+            const nextDate = spawnNextRecurring(t);
+            persist();
+            renderApp();
+            showToast(nextDate ? `Сделано! Повтор на ${formatShortDate(nextDate)}` : 'Этап: Сделано');
+          } else {
+            t.completed = false;
+            if (t.progress === 100) t.progress = 75;
+            persist();
+            renderApp();
+            showToast(`Этап: ${t.status}`);
+          }
+        }
+        else if (action === 'change-week') {
+          state.ui.weekOffset = (state.ui.weekOffset || 0) + Number(id);
+          persist();
+          renderApp();
+        }
+        else if (action === 'open-task-modal') {
+          showTaskModal(id || null, null);
+        }
+        else if (action === 'open-task-modal-date') {
+          showTaskModal(null, id);
+        }
+        else if (action === 'delete-task') {
+          state.tasks = state.tasks.filter(x => x.id !== id);
+          persist();
+          closeModal();
+          renderApp();
+          showToast('Задача удалена');
+        }
+        else if (action === 'switch-habit-view') {
+          state.ui.habitView = id;
+          persist();
+          renderApp();
+        }
+        else if (action === 'open-habit-modal') {
+          showHabitModal(id || null);
+        }
+        else if (action === 'delete-habit') {
+          state.habits = state.habits.filter(x => x.id !== id);
+          persist();
+          closeModal();
+          renderApp();
+          showToast('Привычка удалена');
+        }
+        else if (action === 'toggle-habit-day') {
+          const hId = target.getAttribute('data-habit');
+          const day = Number(target.getAttribute('data-day'));
+          const h = state.habits.find(x => x.id === hId);
+          if (!h) return;
+          const ymKey = getYmKey(state.ui.habitYear, state.ui.habitMonth);
+          if (!h.logs) h.logs = {};
+          if (!h.logs[ymKey]) h.logs[ymKey] = {};
+          h.logs[ymKey][day] = !h.logs[ymKey][day];
+          persist();
+          renderApp();
+        }
+        else if (action === 'change-habit-month') {
+          let m = state.ui.habitMonth + Number(id);
+          let y = state.ui.habitYear;
+          if (m < 0) { m = 11; y--; }
+          if (m > 11) { m = 0; y++; }
+          state.ui.habitMonth = m;
+          state.ui.habitYear = y;
+          persist();
+          renderApp();
+        }
+        else if (action === 'change-habit-year') {
+          state.ui.habitYear += Number(id);
+          persist();
+          renderApp();
+        }
+        else if (action === 'change-budget-month') {
+          const [y, mNum] = state.ui.activeMonth.split('-').map(Number);
+          const nextDt = new Date(y, mNum - 1 + Number(id), 1);
+          const nextYm = getYmKey(nextDt.getFullYear(), nextDt.getMonth());
+          state.ui.activeMonth = nextYm;
+          ensureMonth(nextYm);
+          persist();
+          renderApp();
+        }
+        else if (action === 'toggle-budget-group') {
+          state.ui.expandedGroups[id] = !state.ui.expandedGroups[id];
+          persist();
+          renderApp();
+        }
+        else if (action === 'open-subcat-modal') {
+          showSubcatModal(id);
+        }
+        else if (action === 'delete-subcat') {
+          const gKey = target.getAttribute('data-group');
+          const subId = target.getAttribute('data-subid');
+          const mData = ensureMonth(state.ui.activeMonth);
+          mData.categories[gKey] = (mData.categories[gKey] || []).filter(s => s.id !== subId);
+          persist();
+          renderApp();
+          showToast('Подкатегория удалена');
+        }
+        else if (action === 'set-budget-filter') {
+          state.ui.budgetFilter = id;
+          persist();
+          renderApp();
+        }
+        else if (action === 'open-tx-modal') {
+          showTxModal(id || null);
+        }
+        else if (action === 'delete-tx') {
+          const mData = ensureMonth(state.ui.activeMonth);
+          mData.transactions = (mData.transactions || []).filter(x => x.id !== id);
+          persist();
+          closeModal();
+          renderApp();
+          showToast('Операция удалена');
+        }
+        else if (action === 'open-settings') {
+          showSettingsModal();
+        }
+        else if (action === 'close-modal') {
+          closeModal();
+        }
+        else if (action === 'download-backup') {
+          try {
+            const jsonStr = getBackupJson();
+            const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `lifeos_backup_${getTodayISO()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showToast('Файл резервной копии скачан');
+          } catch (err) {
+            showToast('Скопируйте JSON-код из поля ниже');
+          }
+        }
+        else if (action === 'copy-backup') {
+          const ta = document.getElementById('backup-export-ta');
+          if (!ta) return;
+          ta.value = getBackupJson();
+          ta.select();
+          ta.setSelectionRange(0, 999999);
+          try {
+            document.execCommand('copy');
+            showToast('JSON-код скопирован в буфер');
+          } catch (err) {
+            showToast('Выделите и скопируйте текст вручную');
+          }
+        }
+        else if (action === 'import-backup-text') {
+          const ta = document.getElementById('backup-import-ta');
+          if (!ta || !ta.value.trim()) {
+            showToast('Вставьте JSON-текст в поле');
+            return;
+          }
+          try {
+            const parsed = JSON.parse(ta.value.trim());
+            const cand = (parsed && parsed.data && parsed.tasks) ? parsed.data : parsed;
+            state = sanitizeState(cand);
+            persist();
+            closeModal();
+            renderApp();
+            showToast('Данные восстановлены из копии!');
+          } catch (err) {
+            showToast('Ошибка: некорректный JSON');
+          }
+        }
+        else if (action === 'show-reset-confirm') {
+          const box = document.getElementById('reset-confirm-box');
+          if (box) box.style.display = 'block';
+        }
+        else if (action === 'hide-reset-confirm') {
+          const box = document.getElementById('reset-confirm-box');
+          if (box) box.style.display = 'none';
+        }
+        else if (action === 'confirm-clean-slate') {
+          const now = new Date();
+          const curYm = getYmKey(now.getFullYear(), now.getMonth());
+          const cleanCats = buildDefaultCategories();
+          BUDGET_GROUPS.forEach(g => cleanCats[g.key].forEach(s => { s.plan = 0; }));
+
+          state.tasks = [];
+          state.habits = [];
+          state.months = {
+            [curYm]: {
+              startBalance: 0,
+              dailyLimit: 0,
+              categories: cleanCats,
+              transactions: []
+            }
+          };
+          state.ui.activeMonth = curYm;
+          state.ui.habitYear = now.getFullYear();
+          state.ui.habitMonth = now.getMonth();
+          state.ui.weekOffset = 0;
+          persist();
+          closeModal();
+          renderApp();
+          showToast('Чистый лист готов!');
+        }
+        else if (action === 'load-demo-data') {
+          const curTab = state.ui.tab;
+          state = createDemoState();
+          state.ui.tab = curTab;
+          persist();
+          closeModal();
+          renderApp();
+          showToast('Демо-примеры загружены');
+        }
+      });
+
+      document.addEventListener('change', function(e) {
+        const el = e.target;
+        if (!el) return;
+
+        if (el.classList.contains('budget-meta-input')) {
+          const field = el.getAttribute('data-field');
+          const mData = ensureMonth(state.ui.activeMonth);
+          mData[field] = Math.max(0, Number(el.value) || 0);
+          persist();
+          renderApp();
+          showToast('Обновлено');
+        }
+        else if (el.classList.contains('subcat-plan-input')) {
+          const gKey = el.getAttribute('data-group');
+          const subId = el.getAttribute('data-subid');
+          const mData = ensureMonth(state.ui.activeMonth);
+          const sc = (mData.categories[gKey] || []).find(x => x.id === subId);
+          if (sc) {
+            sc.plan = Math.max(0, Number(el.value) || 0);
+            persist();
+            renderApp();
+          }
+        }
+        else if (el.id === 'f-task-type') {
+          const wrap = document.getElementById('f-rec-wrap');
+          if (wrap) wrap.style.display = el.value === 'Повторяющаяся' ? 'block' : 'none';
+        }
+        else if (el.id === 'f-tx-group') {
+          populateSubcatSelect(el.value, null);
+        }
+        else if (el.id === 'backup-file-input') {
+          const file = el.files && el.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function(ev) {
+            try {
+              const parsed = JSON.parse(ev.target.result);
+              const cand = (parsed && parsed.data && parsed.tasks) ? parsed.data : parsed;
+              state = sanitizeState(cand);
+              persist();
+              closeModal();
+              renderApp();
+              showToast('Резервная копия успешно загружена!');
+            } catch (err) {
+              showToast('Ошибка: файл повреждён или не от LifeOS');
+            }
+          };
+          reader.readAsText(file);
+        }
+      });
+
+      document.addEventListener('input', function(e) {
+        const el = e.target;
+        if (!el) return;
+
+        if (el.id === 'f-task-prog') {
+          const lbl = document.getElementById('f-prog-lbl');
+          if (lbl) lbl.textContent = el.value + '%';
+        }
+        else if (el.id === 'budget-search-input') {
+          state.ui.budgetSearch = el.value;
+          persist();
+          renderApp();
+          const reFocused = document.getElementById('budget-search-input');
+          if (reFocused) {
+            reFocused.focus();
+            reFocused.setSelectionRange(reFocused.value.length, reFocused.value.length);
+          }
+        }
+      });
+
+      document.addEventListener('submit', function(e) {
+        const form = e.target;
+        if (!form) return;
+
+        if (form.id === 'form-task') {
+          e.preventDefault();
+          const editId = form.getAttribute('data-edit-id');
+          const title = document.getElementById('f-task-title').value.trim();
+          if (!title) return;
+
+          const startDate = document.getElementById('f-task-start').value;
+          let endDate = document.getElementById('f-task-end').value;
+          if (endDate < startDate) endDate = startDate;
+
+          const status = document.getElementById('f-task-status').value;
+          let progress = Number(document.getElementById('f-task-prog').value);
+          const completed = status === 'Сделано' || progress === 100;
+          if (completed) progress = 100;
+
+          const prevTask = editId ? state.tasks.find(x => x.id === editId) : null;
+          const wasCompleted = prevTask ? prevTask.completed : false;
+
+          const taskObj = {
+            id: editId || ('t-' + Date.now()),
+            title,
+            desc: document.getElementById('f-task-desc').value.trim(),
+            assignee: document.getElementById('f-task-assignee').value.trim() || 'Я',
+            type: document.getElementById('f-task-type').value,
+            recurrence: document.getElementById('f-task-rec').value,
+            phase: document.getElementById('f-task-phase').value.trim() || 'Общий проект',
+            priority: document.getElementById('f-task-priority').value,
+            status: completed ? 'Сделано' : status,
+            important: document.getElementById('f-task-imp').checked,
+            urgent: document.getElementById('f-task-urg').checked,
+            startDate,
+            endDate,
+            progress,
+            completed,
+            _spawned: prevTask ? prevTask._spawned : false
+          };
+
+          if (editId) {
+            const idx = state.tasks.findIndex(x => x.id === editId);
+            if (idx !== -1) state.tasks[idx] = taskObj;
+          } else {
+            state.tasks.unshift(taskObj);
+          }
+
+          let nextDate = null;
+          if (completed && !wasCompleted) {
+            nextDate = spawnNextRecurring(taskObj);
+          }
+
+          persist();
+          closeModal();
+          renderApp();
+          showToast(nextDate ? `Выполнено! Повтор на ${formatShortDate(nextDate)}` : (editId ? 'Задача обновлена' : 'Задача создана'));
+        }
+        else if (form.id === 'form-habit') {
+          e.preventDefault();
+          const editId = form.getAttribute('data-edit-id');
+          const name = document.getElementById('f-hab-name').value.trim();
+          if (!name) return;
+          const target = Math.min(31, Math.max(1, Number(document.getElementById('f-hab-target').value) || 20));
+          const color = document.getElementById('f-hab-color').value || '#10b981';
+
+          if (editId) {
+            const h = state.habits.find(x => x.id === editId);
+            if (h) { h.name = name; h.target = target; h.color = color; }
+          } else {
+            state.habits.push({ id: 'h-' + Date.now(), name, target, color, logs: {} });
+          }
+
+          persist();
+          closeModal();
+          renderApp();
+          showToast(editId ? 'Привычка обновлена' : 'Привычка добавлена');
+        }
+        else if (form.id === 'form-subcat') {
+          e.preventDefault();
+          const gKey = form.getAttribute('data-group');
+          const name = document.getElementById('f-sc-name').value.trim();
+          if (!name) return;
+          const plan = Math.max(0, Number(document.getElementById('f-sc-plan').value) || 0);
+          const dueEl = document.getElementById('f-sc-due');
+          const dueDay = (dueEl && dueEl.value) ? String(dueEl.value).padStart(2, '0') : '';
+
+          const mData = ensureMonth(state.ui.activeMonth);
+          mData.categories[gKey].push({ id: 'sc-' + Date.now(), name, plan, dueDay });
+          state.ui.expandedGroups[gKey] = true;
+
+          persist();
+          closeModal();
+          renderApp();
+          showToast('Подкатегория добавлена');
+        }
+        else if (form.id === 'form-tx') {
+          e.preventDefault();
+          const editId = form.getAttribute('data-edit-id');
+          const amount = Number(document.getElementById('f-tx-amount').value);
+          if (!amount || amount <= 0) return;
+
+          const txDate = document.getElementById('f-tx-date').value;
+          const txYm = txDate.slice(0, 7);
+          const targetMonthData = ensureMonth(txYm);
+
+          const txObj = {
+            id: editId || ('tx-' + Date.now()),
+            date: txDate,
+            group: document.getElementById('f-tx-group').value,
+            sub: document.getElementById('f-tx-sub').value || 'Прочее',
+            amount,
+            desc: document.getElementById('f-tx-desc').value.trim()
+          };
+
+          if (editId) {
+            Object.values(state.months).forEach(m => {
+              m.transactions = (m.transactions || []).filter(x => x.id !== editId);
+            });
+          }
+          targetMonthData.transactions.push(txObj);
+          state.ui.activeMonth = txYm;
+
+          persist();
+          closeModal();
+          renderApp();
+          showToast(editId ? 'Операция обновлена' : 'Операция записана');
+        }
+      });
+
+      // =========================================================================
+      // 10. ГЛАВНЫЙ РЕНДЕР
+      // =========================================================================
+      function renderApp() {
+        const now = new Date();
+        const weekDaysFull = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+        const dateEl = document.getElementById('header-date');
+        if (dateEl) {
+          dateEl.textContent = `Личный центр управления • ${weekDaysFull[now.getDay()]}, ${now.getDate()} ${MONTHS_GEN[now.getMonth()]}`;
+        }
+
+        const curTab = state.ui.tab || 'dashboard';
+        ['dashboard', 'tasks', 'habits', 'budget'].forEach(t => {
+          const btn = document.getElementById('nav-' + t);
+          if (btn) btn.classList.toggle('active', t === curTab);
+        });
+
+        const main = document.getElementById('app-main');
+        if (!main) return;
+        if (curTab === 'dashboard') main.innerHTML = renderDashboard();
+        else if (curTab === 'tasks') main.innerHTML = renderTasks();
+        else if (curTab === 'habits') main.innerHTML = renderHabits();
+        else if (curTab === 'budget') main.innerHTML = renderBudget();
+      }
+
+      renderApp();
+    })();
+  </script>
+</body>
+</html>
